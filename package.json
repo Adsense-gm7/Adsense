@@ -1,0 +1,12 @@
+{
+  "name": "inside-things",
+  "version": "1.0.0",
+  "description": "Interactive educational experiences — Inside Things",
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "build": "echo 'Static site — no build step needed'"
+  },
+  "keywords": ["insurance", "interactive", "education", "inside-things"],
+  "author": "Inside Things",
+  "license": "MIT"
+}

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why Is My Car Insurance So Expensive? | Inside Insurance</title>
+  <meta name="description" content="Stop reading articles about car insurance. Live the experience. Enter the insurance company, see how they calculate YOUR price, and discover what really drives costs up." />
+  <link rel="canonical" href="https://insidethings.io/insurance" />
+  <meta property="og:title" content="Inside Insurance – Why Is Your Premium So High?" />
+  <meta property="og:description" content="An interactive simulation that puts you inside an insurance company. You choose. You discover. You understand." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ████ CURSOR GLOW ████ -->
+  <div id="cursor-glow"></div>
+
+  <!-- ████ PROGRESS BAR ████ -->
+  <div id="progress-bar">
+    <div id="progress-fill"></div>
+    <div id="progress-label">Experience #1 · Inside Insurance</div>
+  </div>
+
+  <!-- ████ SCENE 0 — HERO ████ -->
+  <section id="scene-0" class="scene scene-hero active">
+    <div class="scene-bg">
+      <div class="grid-overlay"></div>
+      <div class="ambient-orb orb-1"></div>
+      <div class="ambient-orb orb-2"></div>
+      <div class="ambient-orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="tag-line">Inside Things · Experience #01</div>
+      <h1 class="hero-title">
+        <span class="line-reveal">Why is your</span>
+        <span class="line-reveal delay-1">car insurance</span>
+        <span class="line-reveal delay-2 accent-text">so expensive?</span>
+      </h1>
+      <p class="hero-sub line-reveal delay-3">
+        Stop reading articles. Enter the insurance company.<br />
+        See exactly how they calculate <em>your</em> price.
+      </p>
+      <div class="hero-stats line-reveal delay-4">
+        <div class="stat-pill">🔍 135,000 searches/month</div>
+        <div class="stat-pill">⏱ 8 min experience</div>
+        <div class="stat-pill">🎮 Interactive simulation</div>
+      </div>
+      <button id="btn-start" class="btn-primary line-reveal delay-5" onclick="startExperience()">
+        <span>Enter InsurCorp</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="scroll-hint">
+      <div class="scroll-dot"></div>
+      <span>Scroll to enter</span>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 1 — WHO ARE YOU? ████ -->
+  <section id="scene-1" class="scene">
+    <div class="scene-inner">
+      <div class="scene-label">Chapter 01</div>
+      <h2 class="scene-title">You just bought your first car.</h2>
+      <p class="scene-sub">Tell us about yourself. <span class="glow-text">Every answer changes the price.</span></p>
+
+      <div class="profile-builder">
+
+        <!-- Age Selector -->
+        <div class="profile-card" id="card-age">
+          <div class="card-label">Your Age</div>
+          <div class="age-selector">
+            <button class="age-btn active" data-age="19" onclick="selectAge(this)">
+              <span class="age-num">19</span>
+              <span class="age-tag">New Driver</span>
+            </button>
+            <button class="age-btn" data-age="25" onclick="selectAge(this)">
+              <span class="age-num">25</span>
+              <span class="age-tag">Young Adult</span>
+            </button>
+            <button class="age-btn" data-age="35" onclick="selectAge(this)">
+              <span class="age-num">35</span>
+              <span class="age-tag">Experienced</span>
+            </button>
+            <button class="age-btn" data-age="45" onclick="selectAge(this)">
+              <span class="age-num">45</span>
+              <span class="age-tag">Veteran</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Car Selector -->
+        <div class="profile-card" id="card-car">
+          <div class="card-label">Your Car</div>
+          <div class="car-selector">
+            <button class="car-btn active" data-car="economy" onclick="selectCar(this)">
+              <div class="car-icon">🚗</div>
+              <div class="car-name">Economy</div>
+              <div class="car-example">Honda Civic</div>
+            </button>
+            <button class="car-btn" data-car="sport" onclick="selectCar(this)">
+              <div class="car-icon">🏎️</div>
+              <div class="car-name">Sports</div>
+              <div class="car-example">Mustang GT</div>
+            </button>
+            <button class="car-btn" data-car="suv" onclick="selectCar(this)">
+              <div class="car-icon">🚙</div>
+              <div class="car-name">SUV</div>
+              <div class="car-example">Ford Explorer</div>
+            </button>
+            <button class="car-btn" data-car="luxury" onclick="selectCar(this)">
+              <div class="car-icon">🚘</div>
+              <div class="car-name">Luxury</div>
+              <div class="car-example">BMW 5 Series</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Record Selector -->
+        <div class="profile-card" id="card-record">
+          <div class="card-label">Your Driving Record</div>
+          <div class="record-selector">
+            <button class="record-btn active" data-record="clean" onclick="selectRecord(this)">
+              <span class="record-icon">✅</span>
+              <span>Clean — No accidents</span>
+            </button>
+            <button class="record-btn" data-record="minor" onclick="selectRecord(this)">
+              <span class="record-icon">⚠️</span>
+              <span>1 Minor Ticket</span>
+            </button>
+            <button class="record-btn" data-record="accident" onclick="selectRecord(this)">
+              <span class="record-icon">💥</span>
+              <span>1 Accident (at fault)</span>
+            </button>
+            <button class="record-btn" data-record="dui" onclick="selectRecord(this)">
+              <span class="record-icon">🚨</span>
+              <span>DUI on record</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Price Preview -->
+      <div class="price-preview">
+        <div class="price-label">Your estimated monthly premium</div>
+        <div class="price-display">
+          <span class="price-currency">$</span>
+          <span id="live-price" class="price-number">127</span>
+          <span class="price-period">/mo</span>
+        </div>
+        <div class="price-bar-container">
+          <div class="price-bar-track">
+            <div id="price-bar-fill" class="price-bar-fill"></div>
+            <div class="price-bar-label low">$40</div>
+            <div class="price-bar-label high">$500+</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-next" onclick="goToScene(2)">
+        <span>See how they calculated this</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 2 — 1000 CUSTOMERS ████ -->
+  <section id="scene-2" class="scene">
+    <div class="scene-inner">
+      <div class="scene-label">Chapter 02</div>
+      <h2 class="scene-title">Meet your 1,000 neighbors.</h2>
+      <p class="scene-sub">InsurCorp doesn't just insure you. They insure <strong>everyone like you</strong>.</p>
+
+      <div class="crowd-container">
+        <canvas id="crowd-canvas" width="800" height="280"></canvas>
+        <div class="crowd-legend">
+          <div class="legend-item">
+            <div class="legend-dot safe"></div>
+            <span id="legend-safe-count">950</span> safe drivers
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot accident"></div>
+            <span id="legend-accident-count">50</span> will have accidents this year
+          </div>
+          <div class="legend-item legend-you">
+            <div class="legend-dot you"></div>
+            <span>You</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="math-reveal">
+        <div class="math-step" id="math-step-1">
+          <div class="math-icon">💰</div>
+          <div class="math-text">
+            Average accident costs <strong>$8,500</strong> to cover
+          </div>
+        </div>
+        <div class="math-arrow">×</div>
+        <div class="math-step" id="math-step-2">
+          <div class="math-icon">💥</div>
+          <div class="math-text">
+            <span id="math-accidents">50</span> accidents per 1,000 drivers
+          </div>
+        </div>
+        <div class="math-arrow">=</div>
+        <div class="math-step" id="math-step-3">
+          <div class="math-icon">📊</div>
+          <div class="math-text">
+            $<span id="math-total">425,000</span> total risk pool
+          </div>
+        </div>
+        <div class="math-arrow">÷</div>
+        <div class="math-step" id="math-step-4">
+          <div class="math-icon">👥</div>
+          <div class="math-text">
+            1,000 drivers
+          </div>
+        </div>
+        <div class="math-equals">= <strong>$<span id="math-base">35</span>/mo each</strong></div>
+      </div>
+
+      <div class="insight-box">
+        <div class="insight-icon">💡</div>
+        <div class="insight-text">
+          This is the <strong>base cost</strong>. But you're not average. The company now adjusts for <em>you specifically</em>.
+        </div>
+      </div>
+
+      <button class="btn-next" onclick="goToScene(3)">
+        <span>See your personal risk score</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 3 — RISK CALCULATOR ████ -->
+  <section id="scene-3" class="scene">
+    <div class="scene-inner">
+      <div class="scene-label">Chapter 03</div>
+      <h2 class="scene-title">Your Risk Score.</h2>
+      <p class="scene-sub">The company assigns you a score. Watch it change as you adjust each factor.</p>
+
+      <div class="risk-dashboard">
+        <!-- Risk Meter -->
+        <div class="risk-meter-container">
+          <svg class="risk-meter" viewBox="0 0 220 130" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="meter-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#22c55e"/>
+                <stop offset="50%" style="stop-color:#f59e0b"/>
+                <stop offset="100%" style="stop-color:#ef4444"/>
+              </linearGradient>
+            </defs>
+            <!-- Track -->
+            <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#1e293b" stroke-width="18" stroke-linecap="round"/>
+            <!-- Fill -->
+            <path id="meter-fill" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#meter-gradient)" stroke-width="18" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="141"/>
+            <!-- Needle -->
+            <line id="meter-needle" x1="110" y1="110" x2="110" y2="30" stroke="white" stroke-width="3" stroke-linecap="round" transform="rotate(-90, 110, 110)"/>
+            <circle cx="110" cy="110" r="6" fill="white"/>
+            <!-- Labels -->
+            <text x="10" y="128" fill="#22c55e" font-size="10" font-family="Inter">LOW</text>
+            <text x="95" y="20" fill="#f59e0b" font-size="10" font-family="Inter" text-anchor="middle">MED</text>
+            <text x="195" y="128" fill="#ef4444" font-size="10" font-family="Inter" text-anchor="end">HIGH</text>
+          </svg>
+          <div class="risk-score-display">
+            <div class="risk-score-num" id="risk-score-num">62</div>
+            <div class="risk-score-label">Risk Score</div>
+          </div>
+        </div>
+
+        <!-- Risk Factors -->
+        <div class="risk-factors">
+          <div class="factor-row" id="factor-age">
+            <div class="factor-info">
+              <div class="factor-name">Age Factor</div>
+              <div class="factor-value" id="fv-age">+45 points</div>
+            </div>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill age-fill" id="fb-age"></div>
+            </div>
+            <div class="factor-impact negative" id="fi-age">High Risk</div>
+          </div>
+
+          <div class="factor-row" id="factor-car">
+            <div class="factor-info">
+              <div class="factor-name">Vehicle Type</div>
+              <div class="factor-value" id="fv-car">+12 points</div>
+            </div>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill car-fill" id="fb-car"></div>
+            </div>
+            <div class="factor-impact neutral" id="fi-car">Neutral</div>
+          </div>
+
+          <div class="factor-row" id="factor-record">
+            <div class="factor-info">
+              <div class="factor-name">Driving Record</div>
+              <div class="factor-value" id="fv-record">+0 points</div>
+            </div>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill record-fill" id="fb-record"></div>
+            </div>
+            <div class="factor-impact positive" id="fi-record">No Impact</div>
+          </div>
+
+          <div class="factor-row">
+            <div class="factor-info">
+              <div class="factor-name">Credit Score</div>
+              <div class="factor-value">+5 points</div>
+            </div>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:15%;background:#f59e0b"></div>
+            </div>
+            <div class="factor-impact neutral">Minor</div>
+          </div>
+
+          <div class="factor-row">
+            <div class="factor-info">
+              <div class="factor-name">Location / ZIP</div>
+              <div class="factor-value">+8 points</div>
+            </div>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:24%;background:#f59e0b"></div>
+            </div>
+            <div class="factor-impact neutral">Moderate</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-next" onclick="goToScene(4)">
+        <span>Discover what really matters</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 4 — SURPRISE MOMENTS ████ -->
+  <section id="scene-4" class="scene">
+    <div class="scene-inner">
+      <div class="scene-label">Chapter 04</div>
+      <h2 class="scene-title">Things you didn't know.</h2>
+      <p class="scene-sub">The insurance industry keeps these <span class="glow-text">surprisingly quiet.</span></p>
+
+      <div class="surprises-grid">
+
+        <div class="surprise-card" id="surprise-1" onclick="revealSurprise(1)">
+          <div class="surprise-front">
+            <div class="surprise-icon">🎨</div>
+            <div class="surprise-question">Does your car's <strong>color</strong> affect your premium?</div>
+            <div class="reveal-hint">Tap to find out</div>
+          </div>
+          <div class="surprise-back">
+            <div class="surprise-verdict false">❌ MYTH</div>
+            <div class="surprise-answer">
+              Color is <strong>never</strong> factored into insurance pricing. Red cars don't cost more to insure — that's a complete myth that's been around since the 1950s.
+            </div>
+            <div class="surprise-twist">
+              <span class="twist-label">But here's the twist →</span>
+              WHERE you park at night matters a lot. Cars parked on streets in high-theft ZIP codes cost 23% more to insure.
+            </div>
+          </div>
+        </div>
+
+        <div class="surprise-card" id="surprise-2" onclick="revealSurprise(2)">
+          <div class="surprise-front">
+            <div class="surprise-icon">🚗</div>
+            <div class="surprise-question">Safer cars = <strong>cheaper</strong> insurance?</div>
+            <div class="reveal-hint">Tap to find out</div>
+          </div>
+          <div class="surprise-back">
+            <div class="surprise-verdict false">❌ NOT ALWAYS</div>
+            <div class="surprise-answer">
+              Volvo is one of the safest cars on earth. But it's also one of the <strong>most expensive to repair</strong> after a crash. So its insurance can be higher than a "less safe" car.
+            </div>
+            <div class="surprise-twist">
+              <span class="twist-label">What companies actually care about →</span>
+              Repair cost + theft rate + rollover risk. Not just safety stars.
+            </div>
+          </div>
+        </div>
+
+        <div class="surprise-card" id="surprise-3" onclick="revealSurprise(3)">
+          <div class="surprise-front">
+            <div class="surprise-icon">💳</div>
+            <div class="surprise-question">Your <strong>credit score</strong> affects your premium?</div>
+            <div class="reveal-hint">Tap to find out</div>
+          </div>
+          <div class="surprise-back">
+            <div class="surprise-verdict true">✅ TRUE (in 46 states)</div>
+            <div class="surprise-answer">
+              Drivers with poor credit pay up to <strong>76% more</strong> for the same coverage. Insurance companies found that credit score is a strong predictor of claims — even if that feels unfair.
+            </div>
+            <div class="surprise-twist">
+              <span class="twist-label">Only California, Hawaii & Massachusetts ban this practice →</span>
+              In those states, your credit score legally cannot affect your premium.
+            </div>
+          </div>
+        </div>
+
+        <div class="surprise-card" id="surprise-4" onclick="revealSurprise(4)">
+          <div class="surprise-front">
+            <div class="surprise-icon">📍</div>
+            <div class="surprise-question">Moving 2 miles changes <strong>your rate?</strong></div>
+            <div class="reveal-hint">Tap to find out</div>
+          </div>
+          <div class="surprise-back">
+            <div class="surprise-verdict true">✅ YES — Dramatically</div>
+            <div class="surprise-answer">
+              In Detroit, some ZIP codes are <strong>$4,000/year</strong> more expensive than neighboring ZIP codes just 3 miles away. The same driver, same car, totally different price.
+            </div>
+            <div class="surprise-twist">
+              <span class="twist-label">Why? →</span>
+              Accident density, theft reports, hospital costs, and lawsuit frequency are all ZIP-specific. You're not just paying for your risk — you're paying for your neighborhood's risk.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="btn-next" onclick="goToScene(5)">
+        <span>Now try to beat the system</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 5 — THE GAME ████ -->
+  <section id="scene-5" class="scene">
+    <div class="scene-inner">
+      <div class="scene-label">Chapter 05 · Mission</div>
+      <h2 class="scene-title">Beat the system.</h2>
+      <div class="mission-brief">
+        <div class="mission-icon">🎯</div>
+        <div class="mission-text">
+          <strong>Your mission:</strong> Get your monthly premium under <span class="target-price">$80</span>.<br/>
+          You start at <span id="game-start-price">$127</span>/mo. Every decision costs or saves real money.
+        </div>
+      </div>
+
+      <div class="game-arena">
+        <div class="game-price-display">
+          <div class="game-price-label">Monthly Premium</div>
+          <div class="game-price">
+            $<span id="game-price">127</span>
+            <span class="game-price-mo">/mo</span>
+          </div>
+          <div class="game-target-bar">
+            <div class="game-target-track">
+              <div id="game-target-fill" class="game-target-fill danger"></div>
+              <div class="game-target-line"></div>
+              <div class="game-target-label">$80 target</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-moves">
+          <div class="game-move" id="move-telematics">
+            <div class="move-info">
+              <div class="move-name">📱 Install telematics app</div>
+              <div class="move-desc">Company tracks your driving for 90 days</div>
+            </div>
+            <div class="move-impact">-$18/mo</div>
+            <button class="move-btn" onclick="applyMove('telematics', -18, this)">Apply</button>
+          </div>
+
+          <div class="game-move" id="move-deductible">
+            <div class="move-info">
+              <div class="move-name">💸 Raise deductible to $2,000</div>
+              <div class="move-desc">You pay more out of pocket if you crash</div>
+            </div>
+            <div class="move-impact">-$22/mo</div>
+            <button class="move-btn" onclick="applyMove('deductible', -22, this)">Apply</button>
+          </div>
+
+          <div class="game-move" id="move-course">
+            <div class="move-info">
+              <div class="move-name">📚 Take a defensive driving course</div>
+              <div class="move-desc">4 hours online. Available in most states.</div>
+            </div>
+            <div class="move-impact">-$9/mo</div>
+            <button class="move-btn" onclick="applyMove('course', -9, this)">Apply</button>
+          </div>
+
+          <div class="game-move" id="move-bundle">
+            <div class="move-info">
+              <div class="move-name">🏠 Bundle with renter's insurance</div>
+              <div class="move-desc">Same company = multi-policy discount</div>
+            </div>
+            <div class="move-impact">-$14/mo</div>
+            <button class="move-btn" onclick="applyMove('bundle', -14, this)">Apply</button>
+          </div>
+
+          <div class="game-move" id="move-credit">
+            <div class="move-info">
+              <div class="move-name">📈 Improve credit score by 100 pts</div>
+              <div class="move-desc">Takes 6 months but biggest single factor</div>
+            </div>
+            <div class="move-impact">-$31/mo</div>
+            <button class="move-btn" onclick="applyMove('credit', -31, this)">Apply</button>
+          </div>
+        </div>
+
+        <div id="game-won" class="game-won hidden">
+          <div class="won-icon">🏆</div>
+          <div class="won-title">Mission Complete!</div>
+          <div class="won-text">You brought your premium from <strong>$<span id="won-start">127</span></strong> to <strong>$<span id="won-final">63</span>/mo</strong>. That's <strong>$<span id="won-saved">768</span>/year</strong> saved.</div>
+        </div>
+      </div>
+
+      <button class="btn-next" onclick="goToScene(6)">
+        <span>One last thing...</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ████ SCENE 6 — CLIFFHANGER ████ -->
+  <section id="scene-6" class="scene scene-cliffhanger">
+    <div class="cliff-bg">
+      <div class="cliff-orb cliff-orb-1"></div>
+      <div class="cliff-orb cliff-orb-2"></div>
+    </div>
+    <div class="scene-inner cliff-inner">
+      <div class="cliff-complete">
+        <div class="complete-badge">✓ Experience #01 Complete</div>
+        <h2 class="cliff-title">
+          Now you know how they <span class="accent-text">set</span> your price.
+        </h2>
+        <p class="cliff-sub">But here's what they don't tell you...</p>
+      </div>
+
+      <div class="cliff-question">
+        <div class="cliff-q-label">Coming Next →</div>
+        <h3 class="cliff-q-title">How does InsurCorp actually <em>make money</em>?</h3>
+        <p class="cliff-q-sub">
+          Hint: it's not from your premiums.<br/>
+          They're doing something with your money that most people never suspect.
+        </p>
+        <button class="btn-cliff" id="btn-next-exp">
+          <span>Enter the Profit Room</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div class="other-experiences">
+        <div class="other-label">Or explore another Inside Things experience:</div>
+        <div class="other-cards">
+          <div class="other-card">
+            <div class="other-icon">⚖️</div>
+            <div class="other-title">Inside Court</div>
+            <div class="other-sub">What really happens in a lawsuit</div>
+            <div class="other-tag">Coming soon</div>
+          </div>
+          <div class="other-card">
+            <div class="other-icon">🏥</div>
+            <div class="other-title">Inside Hospital</div>
+            <div class="other-sub">How your medical bill is calculated</div>
+            <div class="other-tag">Coming soon</div>
+          </div>
+          <div class="other-card">
+            <div class="other-icon">🏦</div>
+            <div class="other-title">Inside Bank</div>
+            <div class="other-sub">How banks make money from your savings</div>
+            <div class="other-tag">Coming soon</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="share-section">
+        <div class="share-label">Share this experience</div>
+        <div class="share-btns">
+          <button class="share-btn" onclick="shareExperience('twitter')">𝕏 Share on X</button>
+          <button class="share-btn" onclick="shareExperience('copy')">🔗 Copy Link</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ FLOATING NAV ████ -->
+  <nav id="chapter-nav" class="chapter-nav hidden">
+    <button class="chapter-dot active" data-scene="1" onclick="goToScene(1)" title="Who Are You?"></button>
+    <button class="chapter-dot" data-scene="2" onclick="goToScene(2)" title="1,000 Customers"></button>
+    <button class="chapter-dot" data-scene="3" onclick="goToScene(3)" title="Risk Score"></button>
+    <button class="chapter-dot" data-scene="4" onclick="goToScene(4)" title="Surprises"></button>
+    <button class="chapter-dot" data-scene="5" onclick="goToScene(5)" title="The Game"></button>
+    <button class="chapter-dot" data-scene="6" onclick="goToScene(6)" title="What's Next"></button>
+  </nav>
+
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/supabase.js"></script>
+</body>
+</html>
