@@ -1,186 +1,1013 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Why Is My Car Insurance So Expensive? | Inside Things</title>
-  <meta name="description" content="Don't read about car insurance. Run the system yourself. A cinematic 3D simulation."/>
-  <meta property="og:title"       content="Why Is My Car Insurance So Expensive?"/>
-  <meta property="og:description" content="Run the insurance system yourself. Interactive 3D simulation."/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="/css/hud.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Why Is My Car Insurance So Expensive? | Inside Things</title>
+<meta name="description" content="Don't read about car insurance. Run the system yourself. An interactive simulation that shows exactly how your price is calculated."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --accent:#00d4ff;--accent2:#6366f1;--gold:#fbbf24;--green:#22c55e;--red:#ef4444;
+  --bg:#030712;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
+  --text:#f0f4ff;--muted:rgba(240,244,255,0.45);
+  --font:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--body);}
+
+/* ── Canvas background ── */
+#bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;}
+
+/* ── Overlay ── */
+#fade-overlay{position:fixed;inset:0;background:#000;opacity:0;z-index:100;pointer-events:none;transition:opacity 0.4s ease;}
+
+/* ── Scene container ── */
+#app{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;}
+
+.scene{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:none;padding:20px;
+}
+.scene.active{opacity:1;pointer-events:all;}
+
+/* ── Glass card ── */
+.card{
+  background:rgba(3,7,18,0.85);
+  backdrop-filter:blur(32px) saturate(1.5);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:40px 48px;
+  max-width:660px;width:100%;
+  box-shadow:0 0 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.06);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.5),transparent);
+}
+.card-wide{max-width:900px;}
+.card-full{max-width:1100px;}
+
+/* ── Typography ── */
+.tag{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px;display:block;}
+h1{font-family:var(--font);font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1.05;letter-spacing:-.02em;}
+h2{font-family:var(--font);font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1.15;margin-bottom:10px;}
+.accent{color:var(--accent);}
+.sub{font-size:15px;color:var(--muted);line-height:1.6;margin-top:8px;}
+
+/* ── Pill badge ── */
+.badge{display:inline-block;padding:5px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.badge-green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);}
+.badge-cyan{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:var(--accent);}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 28px;border-radius:100px;border:none;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#030712;box-shadow:0 0 30px rgba(0,212,255,.35);}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 50px rgba(0,212,255,.5);}
+.btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:rgba(0,212,255,.4);color:var(--accent);}
+
+/* ── Nav chrome ── */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:24px;
+  background:linear-gradient(to top,rgba(3,7,18,.9) 0,transparent 100%);
+  display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:none;}
+#nav>*{pointer-events:all;}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;
+  transition:all .3s;border:1px solid transparent;}
+.dot:hover{background:rgba(0,212,255,.5);transform:scale(1.4);}
+.dot.done{background:rgba(0,212,255,.35);}
+.dot.on{background:var(--accent);transform:scale(1.6);box-shadow:0 0 10px rgba(0,212,255,.8);}
+
+.arrow{position:fixed;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);
+  border:1px solid var(--border);color:rgba(240,244,255,.6);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .25s;backdrop-filter:blur(10px);z-index:50;}
+.arrow:hover{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.4);color:var(--accent);transform:translateY(-50%) scale(1.1);}
+#prev-btn{left:16px;}
+#next-btn{right:16px;}
+
+#scene-indicator{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:50;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,244,255,.3);font-weight:600;}
+
+/* ── Scene 0: Hero ── */
+.hero-grid{display:grid;gap:24px;}
+.qa-box{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-left:3px solid var(--accent);border-radius:12px;padding:18px 22px;}
+.qa-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:10px;}
+.qa-text{font-size:14px;color:var(--muted);line-height:1.7;}
+.qa-text strong{color:var(--text);}
+.sp-row{display:flex;gap:0;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:100px;overflow:hidden;width:fit-content;}
+.sp-item{padding:12px 24px;text-align:center;}
+.sp-num{font-size:20px;font-weight:800;font-family:var(--font);}
+.sp-label{font-size:11px;color:var(--muted);}
+.sp-div{width:1px;background:var(--border);}
+#live-count{color:var(--green);animation:blink 3s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.hint{font-size:12px;color:var(--muted);margin-top:12px;}
+
+/* ── Scene 1: City fly-in ── */
+.city-scene{text-align:center;}
+.city-canvas-wrap{position:relative;margin:24px auto 0;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+#city-canvas{display:block;width:100%;height:220px;}
+
+/* ── Scene 2-4: building approach ── */
+.building-wrap{display:flex;align-items:center;gap:40px;}
+.building-svg{flex-shrink:0;}
+.building-info{flex:1;}
+.stat-row{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+.stat-label{font-size:13px;color:var(--muted);}
+.stat-val{font-size:20px;font-weight:800;font-family:var(--font);color:var(--accent);}
+
+/* ── Profile builder ── */
+.profile-grid{display:grid;gap:16px;margin-top:20px;}
+.p-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;}
+.sel-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;
+  color:rgba(240,244,255,.6);cursor:pointer;font-family:var(--body);transition:.2s;
+}
+.sel-btn:hover{border-color:rgba(0,212,255,.4);color:var(--text);}
+.sel-btn.on{background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.5);color:var(--accent);}
+.price-big{margin-top:20px;padding-top:20px;border-top:1px solid var(--border);}
+.price-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;}
+.price-num{font-family:var(--font);font-size:56px;font-weight:900;line-height:1;}
+.price-mo{font-size:18px;font-weight:400;color:var(--muted);}
+.risk-bar{height:4px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden;margin:12px 0 4px;}
+.risk-fill{height:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);border-radius:100px;transition:width .6s ease;}
+.risk-txt{font-size:12px;color:var(--muted);}
+
+/* ── Crowd scene ── */
+.crowd-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;margin-top:20px;}
+#crowd-canvas{border-radius:12px;border:1px solid var(--border);}
+.math-box{font-size:15px;line-height:2.2;color:var(--muted);}
+.math-num{font-family:var(--font);font-size:28px;font-weight:800;color:var(--text);}
+.math-op{color:var(--accent);font-size:20px;font-weight:700;}
+.math-eq{color:var(--gold);font-size:20px;font-weight:700;}
+.math-result{font-size:22px;font-weight:800;font-family:var(--font);color:var(--text);}
+
+/* ── Guess cards ── */
+.guess-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;}
+.guess-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;
+  cursor:pointer;transition:.2s;perspective:1000px;}
+.guess-card.answered{cursor:default;}
+.gc-icon{font-size:30px;margin-bottom:10px;}
+.gc-q{font-size:13px;color:rgba(240,244,255,.75);line-height:1.5;margin-bottom:14px;}
+.gc-btns{display:flex;gap:8px;}
+.gc-btn{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;
+  padding:8px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:var(--body);transition:.2s;}
+.gc-btn:hover:not(:disabled){background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);}
+.gc-btn.correct{background:rgba(34,197,94,.15)!important;border-color:var(--green)!important;color:var(--green)!important;}
+.gc-btn.wrong{background:rgba(239,68,68,.1)!important;border-color:var(--red)!important;color:var(--red)!important;opacity:.6;}
+.gc-reveal{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.5;display:none;}
+.gc-reveal.show{display:block;}
+.verdict-true{color:var(--green);font-weight:700;font-size:13px;}
+.verdict-false{color:var(--red);font-weight:700;font-size:13px;}
+
+/* ── Game ── */
+.game-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px;}
+.game-price-big{font-family:var(--font);font-size:64px;font-weight:900;line-height:1;margin-bottom:8px;}
+.target-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;}
+.target-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;}
+.game-progress{height:6px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden;margin-top:8px;}
+.game-progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:100px;transition:width .5s ease;}
+.moves{display:flex;flex-direction:column;gap:10px;}
+.move{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;gap:12px;}
+.move-label{font-size:13px;font-weight:500;}
+.move-save{font-size:13px;font-weight:700;color:var(--green);}
+.move-apply{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:7px 14px;
+  font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;font-family:var(--body);transition:.2s;white-space:nowrap;flex-shrink:0;}
+.move-apply:hover:not(:disabled){background:rgba(0,212,255,.2);}
+.move-apply.done{background:rgba(34,197,94,.1);border-color:var(--green);color:var(--green);cursor:default;}
+.won-banner{text-align:center;padding:20px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:14px;margin-top:16px;display:none;}
+.won-banner.show{display:block;}
+
+/* ── Cliff ── */
+.viral-card{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:18px;padding:24px;margin-top:20px;}
+.viral-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:12px;}
+.viral-result{font-size:22px;font-family:var(--font);font-weight:800;margin-bottom:4px;}
+.viral-result strong{color:var(--accent);}
+.viral-q{font-size:14px;color:var(--muted);margin-bottom:16px;}
+.viral-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.v-btn{padding:11px 20px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);border:none;transition:.2s;}
+.v-btn.pri{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#030712;}
+.v-btn.pri:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,212,255,.3);}
+.v-btn.sec{background:rgba(255,255,255,.05);border:1px solid var(--border);color:rgba(240,244,255,.7);}
+.v-btn.sec:hover{background:rgba(255,255,255,.1);}
+.email-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.email-inp{flex:1;min-width:200px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:100px;padding:12px 18px;font-size:13px;color:var(--text);outline:none;font-family:var(--body);}
+.email-inp:focus{border-color:rgba(0,212,255,.4);}
+.email-sub{background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:100px;padding:12px 20px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:80px;left:20px;z-index:200;
+  background:rgba(3,7,18,.95);border:1px solid rgba(0,212,255,.35);border-radius:16px;
+  padding:14px 18px;display:flex;align-items:center;gap:14px;min-width:260px;
+  backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.6);
+  transform:translateY(100px);opacity:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{font-size:26px;filter:drop-shadow(0 0 8px rgba(0,212,255,.5));}
+.toast-title{font-size:14px;font-weight:700;font-family:var(--font);}
+.toast-sub{font-size:11px;color:var(--muted);}
+
+/* ── Cursor glow ── */
+#cg{position:fixed;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,.06) 0,transparent 70%);
+  pointer-events:none;z-index:1;transition:transform .1s linear;}
+
+/* ── Animations ── */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,212,255,.4)}70%{box-shadow:0 0 0 12px rgba(0,212,255,0)}100%{box-shadow:0 0 0 0 rgba(0,212,255,0)}}
+
+/* ── Responsive ── */
+@media(max-width:700px){
+  .card{padding:24px 20px;border-radius:20px;}
+  h1{font-size:28px;}
+  h2{font-size:20px;}
+  .crowd-layout,.game-layout,.guess-grid{grid-template-columns:1fr;}
+  .building-wrap{flex-direction:column;}
+  .sp-row{flex-wrap:wrap;border-radius:14px;}
+  #crowd-canvas{width:100%;}
+  .arrow{width:40px;height:40px;font-size:16px;}
+  #prev-btn{left:8px;}#next-btn{right:8px;}
+}
+</style>
 </head>
 <body>
 
-  <!-- Cursor glow -->
-  <div id="cursor-glow"></div>
+<canvas id="bg-canvas"></canvas>
+<div id="cg"></div>
+<div id="fade-overlay"></div>
 
-  <!-- Three.js canvas -->
-  <canvas id="canvas-3d"></canvas>
+<div id="scene-indicator">1 / 8 — ARRIVAL</div>
 
-  <!-- Fade overlay for scene transitions -->
-  <div id="scene-overlay"></div>
+<!-- ════ SCENES ════ -->
+<div id="app">
 
-  <!-- HUD overlay layer -->
-  <div id="hud-layer">
-
-    <!-- ── HERO (Scene 0) ── -->
-    <div id="hud-hero" class="hud-panel hud-center" style="display:flex">
-      <div class="hero-tag">Inside Things · Flight Simulator for Complex Systems</div>
-      <h1 class="hud-title">
-        Why is your car insurance<br/>
-        <span class="accent">so expensive?</span>
-      </h1>
-      <div class="quick-answer">
+<!-- S0: HERO -->
+<div class="scene active" id="s0">
+  <div class="card" style="max-width:680px;">
+    <div class="hero-grid">
+      <div>
+        <span class="tag">Inside Things · Experience #01</span>
+        <h1>Why is your car insurance <span class="accent">so expensive?</span></h1>
+        <p class="sub">You already know the answer exists. Now you'll <em>feel</em> it.</p>
+      </div>
+      <div class="qa-box">
         <div class="qa-label">⚡ Quick Answer</div>
-        <p class="qa-text">Insurance companies pool risk across <strong>thousands of drivers</strong>. Your price is determined by your <strong>age, car, record, credit score and ZIP</strong>. Young drivers can pay <strong>3–5× more</strong>.</p>
-        <div class="qa-cta">Don't read about it. <em>Run the system yourself.</em></div>
+        <p class="qa-text">Insurance companies pool risk across <strong>thousands of drivers</strong>. Your price is set by <strong>age · car · record · credit · ZIP</strong>. Young drivers can pay <strong>3–5× more</strong> than a 45-year-old.</p>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);">Don't just read it. <em style="color:var(--accent);font-style:normal;font-weight:600;">Run the system yourself.</em></div>
       </div>
-      <div class="social-proof">
-        <div class="sp-item"><div class="sp-num" id="sp-live">1,247</div><div class="sp-label">inside right now</div></div>
-        <div class="sp-sep"></div>
-        <div class="sp-item"><div class="sp-num">84%</div><div class="sp-label">guessed wrong</div></div>
-        <div class="sp-sep"></div>
-        <div class="sp-item"><div class="sp-num">2 min</div><div class="sp-label">to finish</div></div>
-      </div>
-      <button class="begin-btn" onclick="nextScene()">
-        <span>Enter InsurCorp</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-      <div class="key-hint">or press Space / Scroll Down</div>
-    </div>
-
-    <!-- ── PROFILE BUILDER (Scene 5) ── -->
-    <div id="hud-profile" data-hud="hud-profile" class="hud-panel hud-side-right">
-      <div class="hud-chapter">Chapter 01 · Floor 27</div>
-      <h2 class="hud-section-title">You just bought your first car.</h2>
-      <p class="hud-section-sub">Build your profile. Every choice changes your price live.</p>
-      <div class="profile-group">
-        <div class="profile-label">Your Age</div>
-        <div class="profile-row">
-          <button class="age-btn active" data-age="19">19</button>
-          <button class="age-btn" data-age="25">25</button>
-          <button class="age-btn" data-age="35">35</button>
-          <button class="age-btn" data-age="45">45</button>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div class="sp-row">
+          <div class="sp-item"><div class="sp-num" id="live-count">1,247</div><div class="sp-label">inside now</div></div>
+          <div class="sp-div"></div>
+          <div class="sp-item"><div class="sp-num">84%</div><div class="sp-label">guessed wrong</div></div>
+          <div class="sp-div"></div>
+          <div class="sp-item"><div class="sp-num">2 min</div><div class="sp-label">to finish</div></div>
         </div>
       </div>
-      <div class="profile-group">
-        <div class="profile-label">Your Car</div>
-        <div class="profile-row">
-          <button class="car-btn active" data-car="economy">🚗 Economy</button>
-          <button class="car-btn" data-car="sports">🏎 Sports</button>
-          <button class="car-btn" data-car="suv">🚙 SUV</button>
-          <button class="car-btn" data-car="luxury">✨ Luxury</button>
-        </div>
-      </div>
-      <div class="profile-group">
-        <div class="profile-label">Driving Record</div>
-        <div class="profile-row">
-          <button class="record-btn active" data-record="clean">✅ Clean</button>
-          <button class="record-btn" data-record="ticket">⚠️ Ticket</button>
-          <button class="record-btn" data-record="accident">🚨 Accident</button>
-          <button class="record-btn" data-record="dui">🔴 DUI</button>
-        </div>
-      </div>
-      <div class="price-display">
-        <div class="price-label">Monthly Premium</div>
-        <div class="price-value">$<span id="hud-price">127</span><span class="price-mo">/mo</span></div>
-        <div class="risk-bar-wrap">
-          <div class="risk-bar-track"><div class="risk-bar-fill" id="hud-risk-bar" style="width:55%"></div></div>
-          <span class="risk-bar-label">Risk Score: <strong id="hud-risk-num">62</strong>/100</span>
-        </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="animation:pulse-ring 2s ease infinite;" onclick="goTo(1)">
+          Enter InsurCorp
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <span class="hint">or press → or scroll</span>
       </div>
     </div>
-
-    <!-- ── CROWD MATH (Scene 6) ── -->
-    <div id="hud-crowd" data-hud="hud-crowd" class="hud-panel hud-side-left">
-      <div class="hud-chapter">Chapter 02 · The Pool</div>
-      <h2 class="hud-section-title">You're not paying alone.</h2>
-      <p class="hud-section-sub">Every orb is a driver. Your gold orb is you.</p>
-      <div id="crowd-math" class="crowd-math"></div>
-    </div>
-
-    <!-- ── GUESS MECHANIC (Scene 7) ── -->
-    <div id="hud-guess" data-hud="hud-guess" class="hud-panel hud-center-wide">
-      <div class="hud-chapter">Chapter 03 · Myth Busters</div>
-      <h2 class="hud-section-title">What do you think?</h2>
-      <p class="hud-section-sub">84% get at least one wrong.</p>
-      <div id="guess-cards" class="guess-grid"></div>
-    </div>
-
-    <!-- ── GAME (Scene 8) ── -->
-    <div id="hud-game" data-hud="hud-game" class="hud-panel hud-side-right">
-      <div class="hud-chapter">Chapter 04 · Beat the System</div>
-      <h2 class="hud-section-title">Get below $80/mo.</h2>
-      <div class="game-price-display">$<span id="game-price">127</span><span class="price-mo">/mo</span></div>
-      <div class="moves-list">
-        <div class="move-row"><div class="move-info"><div class="move-label">📱 Install telematics app</div><div class="move-save">-$18/mo</div></div><button class="move-btn" data-move="telematics">Apply</button></div>
-        <div class="move-row"><div class="move-info"><div class="move-label">💸 Raise deductible $2,000</div><div class="move-save">-$22/mo</div></div><button class="move-btn" data-move="deductible">Apply</button></div>
-        <div class="move-row"><div class="move-info"><div class="move-label">📚 Defensive driving course</div><div class="move-save">-$9/mo</div></div><button class="move-btn" data-move="course">Apply</button></div>
-        <div class="move-row"><div class="move-info"><div class="move-label">🏠 Bundle with renter's</div><div class="move-save">-$14/mo</div></div><button class="move-btn" data-move="bundle">Apply</button></div>
-        <div class="move-row"><div class="move-info"><div class="move-label">📈 Improve credit 100 pts</div><div class="move-save">-$31/mo</div></div><button class="move-btn" data-move="credit">Apply</button></div>
-      </div>
-      <div id="game-won" class="game-won hidden">🏆 <strong>System Beaten!</strong> Under $80/month.</div>
-    </div>
-
-    <!-- ── CLIFFHANGER (Scene 9) ── -->
-    <div id="hud-cliff" data-hud="hud-cliff" class="hud-panel hud-center">
-      <div class="cliff-badge">✓ Experience Complete</div>
-      <h2 class="cliff-title">Now you know how they<br/><span class="accent">set your price.</span></h2>
-      <p class="cliff-sub">But here's what they don't tell you...</p>
-      <div class="viral-card">
-        <div class="viral-label">🎯 Challenge a friend</div>
-        <div class="viral-result">My insurance: <strong>$<span id="viral-price">127</span>/mo</strong></div>
-        <div class="viral-q">Can you get below <strong>$80</strong>?</div>
-        <div class="viral-btns">
-          <button class="viral-btn primary" onclick="viralShare('twitter')">𝕏 Share on X</button>
-          <button class="viral-btn secondary" onclick="viralShare('copy')">🔗 Copy Link</button>
-        </div>
-        <div id="viral-copied" class="viral-copied"></div>
-      </div>
-      <div class="email-widget">
-        <div class="email-label">Get notified when next experience launches</div>
-        <div class="email-row">
-          <input id="email-input" type="email" class="email-input" placeholder="your@email.com"/>
-          <button class="email-btn" onclick="subscribeEmail(document.getElementById('email-input').value)">Notify Me</button>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /hud-layer -->
-
-  <!-- ── NAVIGATION CHROME ── -->
-  <div id="nav-chrome">
-    <!-- Scene label -->
-    <div id="scene-label" class="scene-label">1 / 10 — Arrival</div>
-
-    <!-- Dot indicators -->
-    <div id="nav-dots" class="nav-dots">
-      <div class="nav-dot active"  onclick="goToSceneBtn(0)" title="Arrival"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(1)" title="The City"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(2)" title="InsurCorp"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(3)" title="Enter"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(4)" title="Elevator"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(5)" title="Profile"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(6)" title="1000 Drivers"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(7)" title="Myths"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(8)" title="Game"></div>
-      <div class="nav-dot"         onclick="goToSceneBtn(9)" title="End"></div>
-    </div>
-
-    <!-- Prev / Next -->
-    <button id="btn-prev" class="nav-arrow left"  onclick="prevScene()" style="opacity:0">&#8592;</button>
-    <button id="btn-next" class="nav-arrow right" onclick="nextScene()">&#8594;</button>
   </div>
+</div>
 
-  <script type="module" src="/src/main.js"></script>
-  <script>
-    // Bridge for HTML onclick (before module loads)
-    function goToSceneBtn(i) {
-      import('/src/scenes/director.js').then(m => m.goToScene(i));
+<!-- S1: CITY APPROACH -->
+<div class="scene" id="s1">
+  <div class="card card-wide" style="text-align:center;">
+    <span class="tag">Scene 01 · The City</span>
+    <h2>Welcome to <span class="accent">Neon District</span></h2>
+    <p class="sub">Every building you see is a different insurance company.<br/>Each one is watching the same 1,000 drivers.</p>
+    <div class="city-canvas-wrap" style="max-width:700px;margin:24px auto 0;">
+      <canvas id="city-canvas" height="200"></canvas>
+    </div>
+    <div style="display:flex;justify-content:center;gap:20px;margin-top:24px;flex-wrap:wrap;">
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;font-family:var(--font);color:var(--accent);">$127B</div><div style="font-size:12px;color:var(--muted);">US car insurance market</div></div>
+      <div style="width:1px;background:var(--border);"></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;font-family:var(--font);color:var(--gold);">6</div><div style="font-size:12px;color:var(--muted);">major factors set your price</div></div>
+      <div style="width:1px;background:var(--border);"></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;font-family:var(--font);color:var(--green);">73%</div><div style="font-size:12px;color:var(--muted);">overpay by not shopping</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: INSURCORP HQ -->
+<div class="scene" id="s2">
+  <div class="card card-wide">
+    <div class="building-wrap">
+      <div class="building-svg">
+        <svg id="building-svg" width="160" height="280" viewBox="0 0 160 280" fill="none">
+          <!-- Main tower -->
+          <rect x="30" y="40" width="100" height="240" rx="4" fill="#0d1420" stroke="rgba(0,212,255,.3)" stroke-width="1"/>
+          <!-- Logo glow -->
+          <rect x="55" y="55" width="50" height="20" rx="4" fill="rgba(0,212,255,.2)" stroke="rgba(0,212,255,.5)" stroke-width="1"/>
+          <text x="80" y="69" text-anchor="middle" fill="#00d4ff" font-size="9" font-weight="700" font-family="Inter">INSURCORP</text>
+          <!-- Windows grid -->
+          <g id="windows" opacity=".8"></g>
+          <!-- Ground glow -->
+          <ellipse cx="80" cy="278" rx="60" ry="8" fill="rgba(0,212,255,.15)"/>
+          <!-- Entrance -->
+          <rect x="65" y="250" width="30" height="30" rx="2" fill="rgba(0,212,255,.1)" stroke="rgba(0,212,255,.4)" stroke-width="1"/>
+          <line x1="80" y1="250" x2="80" y2="280" stroke="rgba(0,212,255,.4)" stroke-width=".5"/>
+        </svg>
+      </div>
+      <div class="building-info">
+        <span class="tag">InsurCorp Headquarters</span>
+        <h2>This is where your<br/><span class="accent">price is decided.</span></h2>
+        <p class="sub" style="margin-bottom:20px;">Inside is a Risk Department on Floor 27. A room full of actuaries calculating exactly how much risk <em>you</em> represent.</p>
+        <div class="stat-row">
+          <div class="stat"><span class="stat-label">Employees crunching your data</span><span class="stat-val">0</span></div>
+          <div class="stat"><span class="stat-label">Variables they consider</span><span class="stat-val">0</span></div>
+          <div class="stat"><span class="stat-label">Seconds to generate your price</span><span class="stat-val">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: LOBBY / ELEVATOR -->
+<div class="scene" id="s3">
+  <div class="card" style="text-align:center;max-width:500px;">
+    <span class="tag">Scene 03 · Going Up</span>
+    <h2>Taking you to<br/><span class="accent">Floor 27.</span></h2>
+    <p class="sub">Risk Department. This is where every premium is born.</p>
+    <div style="margin:32px auto;width:120px;height:180px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:12px;position:relative;overflow:hidden;">
+      <div id="elevator-car" style="width:80px;height:50px;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);transition:transform 2s cubic-bezier(.4,0,.2,1);">⬆ 27</div>
+      <div style="position:absolute;top:10px;right:10px;font-family:var(--font);font-size:22px;font-weight:900;color:var(--accent);" id="floor-num">1</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);">Doors open in <span style="color:var(--accent);font-weight:700;" id="floor-count">3</span>s</div>
+  </div>
+</div>
+
+<!-- S4: PROFILE BUILDER -->
+<div class="scene" id="s4">
+  <div class="card card-wide">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+      <div>
+        <span class="tag">Chapter 01 · Floor 27</span>
+        <h2>Build your<br/><span class="accent">Risk Profile.</span></h2>
+        <p class="sub">Every choice changes your premium in real time.</p>
+        <div class="profile-grid">
+          <div>
+            <div class="p-group-label">Age</div>
+            <div class="btn-row">
+              <button class="sel-btn on" data-g="age" data-v="19">19</button>
+              <button class="sel-btn" data-g="age" data-v="25">25</button>
+              <button class="sel-btn" data-g="age" data-v="35">35</button>
+              <button class="sel-btn" data-g="age" data-v="45">45</button>
+            </div>
+          </div>
+          <div>
+            <div class="p-group-label">Car Type</div>
+            <div class="btn-row">
+              <button class="sel-btn on" data-g="car" data-v="economy">🚗 Economy</button>
+              <button class="sel-btn" data-g="car" data-v="sports">🏎 Sports</button>
+              <button class="sel-btn" data-g="car" data-v="suv">🚙 SUV</button>
+              <button class="sel-btn" data-g="car" data-v="luxury">✨ Luxury</button>
+            </div>
+          </div>
+          <div>
+            <div class="p-group-label">Driving Record</div>
+            <div class="btn-row">
+              <button class="sel-btn on" data-g="rec" data-v="clean">✅ Clean</button>
+              <button class="sel-btn" data-g="rec" data-v="ticket">⚠️ Ticket</button>
+              <button class="sel-btn" data-g="rec" data-v="accident">🚨 Accident</button>
+              <button class="sel-btn" data-g="rec" data-v="dui">🔴 DUI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="price-big">
+          <div class="price-label">Your Monthly Premium</div>
+          <div class="price-num" style="color:var(--text);">$<span id="p-price">127</span><span class="price-mo">/mo</span></div>
+          <div class="risk-bar"><div class="risk-fill" id="risk-fill" style="width:55%"></div></div>
+          <div class="risk-txt">Risk Score: <strong id="risk-num" style="color:var(--text);">62</strong>/100</div>
+        </div>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;">Age factor</div>
+            <div style="font-size:18px;font-weight:800;font-family:var(--font);" id="age-factor">+$92/mo (young driver)</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;">Car factor</div>
+            <div style="font-size:18px;font-weight:800;font-family:var(--font);" id="car-factor">+$0/mo (economy base)</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;">Record factor</div>
+            <div style="font-size:18px;font-weight:800;font-family:var(--font);" id="rec-factor">+$0/mo (clean)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S5: 1000 DRIVERS -->
+<div class="scene" id="s5">
+  <div class="card card-wide">
+    <span class="tag">Chapter 02 · The Risk Pool</span>
+    <h2>You're not paying alone.<br/><span class="accent">1,000 drivers. One pool.</span></h2>
+    <div class="crowd-layout">
+      <canvas id="crowd-canvas" width="360" height="260"></canvas>
+      <div>
+        <div class="math-box">
+          <div><span class="math-num">50</span> accidents × <span class="math-num">$8,500</span></div>
+          <div class="math-op">÷</div>
+          <div><span class="math-num">1,000</span> drivers in pool</div>
+          <div class="math-eq">=</div>
+          <div class="math-result">$425/yr base cost</div>
+          <div style="font-size:12px;margin-top:8px;color:var(--muted);">Then your personal risk score adjusts it.</div>
+        </div>
+        <div style="margin-top:20px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:var(--accent);font-weight:700;margin-bottom:8px;">🟡 YOUR ORB</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">You are the golden orb. The red orbs are future claimants. The algorithm calculates your statistical likelihood of becoming one.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: MYTH BUSTERS -->
+<div class="scene" id="s6">
+  <div class="card card-full" style="max-width:860px;">
+    <span class="tag">Chapter 03 · Myth Busters</span>
+    <h2>What affects your premium?<br/><span class="accent">Test yourself.</span></h2>
+    <div class="guess-grid" id="guess-grid"></div>
+  </div>
+</div>
+
+<!-- S7: BEAT THE SYSTEM -->
+<div class="scene" id="s7">
+  <div class="card card-wide">
+    <span class="tag">Chapter 04 · Mission</span>
+    <h2>Beat the system.<br/><span class="accent">Get below $80/mo.</span></h2>
+    <div class="game-layout">
+      <div>
+        <div class="game-price-big">$<span id="g-price">127</span><span style="font-size:22px;font-weight:400;color:var(--muted);">/mo</span></div>
+        <div class="target-bar">
+          <div class="target-label">Progress to $80 target</div>
+          <div class="game-progress"><div class="game-progress-fill" id="g-bar" style="width:0%"></div></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;">Save <strong id="g-saved" style="color:var(--green);">$0</strong>/mo so far</div>
+        </div>
+        <div class="won-banner" id="won-banner">
+          <div style="font-size:32px;margin-bottom:8px;">🏆</div>
+          <div style="font-size:20px;font-weight:800;font-family:var(--font);color:var(--gold);">System Beaten!</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;">You're under $80/month.</div>
+        </div>
+      </div>
+      <div class="moves" id="moves-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S8: CLIFFHANGER -->
+<div class="scene" id="s8">
+  <div class="card" style="max-width:600px;text-align:center;">
+    <span class="badge badge-green" style="margin-bottom:20px;display:inline-block;">✓ Experience #01 Complete</span>
+    <h2>Now you know how they<br/><span class="accent">set your price.</span></h2>
+    <p class="sub" style="margin-bottom:24px;">But here's what they don't tell you — InsurCorp makes most of its money from <strong style="color:var(--text);">investing your premiums</strong>, not from you at all.</p>
+    <div class="viral-card">
+      <div class="viral-label">🎯 Challenge a friend</div>
+      <div class="viral-result">My insurance: <strong>$<span id="v-price">127</span>/mo</strong></div>
+      <div class="viral-q" style="margin-bottom:16px;">Can you get below <strong>$80</strong>?</div>
+      <div class="viral-btns">
+        <button class="v-btn pri" onclick="shareX()">𝕏 Share on X</button>
+        <button class="v-btn sec" onclick="copyLink()">🔗 Copy Link</button>
+      </div>
+      <div id="copy-msg" style="font-size:12px;color:var(--green);min-height:20px;margin-top:10px;"></div>
+    </div>
+    <div style="margin-top:20px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Get notified when Experience #02 drops</div>
+      <div class="email-row">
+        <input class="email-inp" id="email" type="email" placeholder="your@email.com"/>
+        <button class="email-sub" onclick="subscribe()">Notify Me</button>
+      </div>
+      <div id="sub-msg" style="font-size:12px;color:var(--green);min-height:20px;margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- Nav -->
+<div id="nav">
+  <div id="dots"></div>
+</div>
+<button class="arrow" id="prev-btn" onclick="prev()" style="opacity:0">&#8592;</button>
+<button class="arrow" id="next-btn" onclick="next()">&#8594;</button>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="t-icon">🚀</div>
+  <div><div class="toast-title" id="t-title">Achievement</div><div class="toast-sub" id="t-sub">Unlocked</div></div>
+  <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);padding:3px 8px;border-radius:100px;font-weight:700;white-space:nowrap;">Achievement</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {age:19,car:'economy',rec:'clean',basePrice:127};
+const PRICE={age:{19:92,25:45,35:0,45:-12},car:{economy:0,sports:55,suv:28,luxury:75},rec:{clean:0,ticket:35,accident:98,dui:185}};
+const RISK={age:{19:45,25:22,35:5,45:2},car:{economy:5,sports:25,suv:15,luxury:20},rec:{clean:0,ticket:18,accident:35,dui:55}};
+const AGE_LABEL={19:'young driver +',25:'young adult +',35:'experienced',45:'veteran, -'};
+const CAR_LABEL={economy:'economy base',sports:'sports premium',suv:'SUV surcharge',luxury:'luxury surcharge'};
+const REC_LABEL={clean:'clean record',ticket:'minor ticket',accident:'at-fault accident',dui:'DUI surcharge'};
+const calcPrice=()=>S.basePrice+PRICE.age[S.age]+PRICE.car[S.car]+PRICE.rec[S.rec];
+const calcRisk=()=>Math.min(RISK.age[S.age]+RISK.car[S.car]+RISK.rec[S.rec]+10,100);
+
+let cur=0,busy=false;
+const TOTAL=9;
+const NAMES=['Arrival','The City','InsurCorp','Floor 27','Your Profile','Risk Pool','Myth Busters','Beat System','What\'s Next'];
+
+// ═══════════════════════════════════════════════════════
+// BG CANVAS — Animated star field
+// ═══════════════════════════════════════════════════════
+const bgCanvas=document.getElementById('bg-canvas');
+const bgCtx=bgCanvas.getContext('2d');
+let stars=[];
+function initStars(){
+  bgCanvas.width=innerWidth;bgCanvas.height=innerHeight;
+  stars=Array.from({length:200},()=>({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    r:Math.random()*1.5+.3,
+    s:Math.random()*.5+.1,
+    o:Math.random()*.8+.2,
+    twinkle:Math.random()*Math.PI*2
+  }));
+}
+function drawBg(t){
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+  // Deep space gradient
+  const g=bgCtx.createRadialGradient(innerWidth/2,innerHeight/2,0,innerWidth/2,innerHeight/2,Math.max(innerWidth,innerHeight)/1.5);
+  g.addColorStop(0,'#0a1628');g.addColorStop(.6,'#05090f');g.addColorStop(1,'#020408');
+  bgCtx.fillStyle=g;bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+  // Stars
+  stars.forEach(s=>{
+    s.twinkle+=.02;s.y-=s.s;if(s.y<0)s.y=innerHeight;
+    const alpha=s.o*(0.7+0.3*Math.sin(s.twinkle));
+    bgCtx.beginPath();bgCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    bgCtx.fillStyle=`rgba(200,220,255,${alpha})`;bgCtx.fill();
+  });
+  // Subtle neon glow at bottom
+  const bg=bgCtx.createLinearGradient(0,innerHeight*.7,0,innerHeight);
+  bg.addColorStop(0,'transparent');bg.addColorStop(1,'rgba(0,212,255,.04)');
+  bgCtx.fillStyle=bg;bgCtx.fillRect(0,innerHeight*.7,innerWidth,innerHeight*.3);
+  requestAnimationFrame(drawBg);
+}
+initStars();requestAnimationFrame(drawBg);
+window.addEventListener('resize',()=>{initStars();});
+
+// ═══════════════════════════════════════════════════════
+// CITY CANVAS (S1)
+// ═══════════════════════════════════════════════════════
+function drawCity(){
+  const c=document.getElementById('city-canvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  c.width=c.offsetWidth||700;c.height=200;
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  // Sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#030712');sky.addColorStop(1,'#0a1628');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // Buildings
+  const rng=mulberry32(77);
+  const COUNT=30;
+  for(let i=0;i<COUNT;i++){
+    const x=i*(W/COUNT)+(rng()-.5)*8;
+    const bw=W/COUNT*0.7+rng()*8;
+    const bh=30+rng()*130;
+    const by=H-bh-10;
+    // Building body
+    ctx.fillStyle=`hsl(215,30%,${6+rng()*6}%)`;
+    ctx.fillRect(x,by,bw,bh);
+    // Windows
+    const cols=Math.floor(bw/10);
+    const rows=Math.floor(bh/14);
+    for(let r=0;r<rows;r++){
+      for(let cl=0;cl<cols;cl++){
+        if(rng()>.35){
+          const alpha=.2+rng()*.5;
+          ctx.fillStyle=`rgba(${rng()>.7?200:100},${rng()>.7?220:180},255,${alpha})`;
+          ctx.fillRect(x+cl*10+2,by+r*14+3,6,8);
+        }
+      }
     }
-  </script>
+    // Roof glow for main buildings
+    if(bh>80){
+      const rg=ctx.createLinearGradient(x,by,x,by+20);
+      rg.addColorStop(0,'rgba(0,212,255,.25)');rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg;ctx.fillRect(x,by,bw,20);
+      // Antenna
+      ctx.beginPath();ctx.moveTo(x+bw/2,by);ctx.lineTo(x+bw/2,by-15);
+      ctx.strokeStyle='rgba(0,212,255,.4)';ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();ctx.arc(x+bw/2,by-16,2,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,80,80,.8)';ctx.fill();
+    }
+  }
+  // Ground
+  const gr=ctx.createLinearGradient(0,H-12,0,H);
+  gr.addColorStop(0,'rgba(0,212,255,.15)');gr.addColorStop(1,'transparent');
+  ctx.fillStyle=gr;ctx.fillRect(0,H-12,W,12);
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILDING SVG WINDOWS
+// ═══════════════════════════════════════════════════════
+function drawBuildingWindows(){
+  const g=document.getElementById('windows');if(!g)return;
+  g.innerHTML='';
+  const rng=mulberry32(12);
+  for(let row=0;row<8;row++){
+    for(let col=0;col<4;col++){
+      const x=35+col*24;const y=85+row*18;
+      const on=rng()>.3;
+      const el=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      el.setAttribute('x',x);el.setAttribute('y',y);el.setAttribute('width',18);el.setAttribute('height',12);
+      el.setAttribute('rx',2);
+      el.setAttribute('fill',on?`rgba(100,180,255,${.2+rng()*.4})`:'rgba(255,255,255,.03)');
+      g.appendChild(el);
+    }
+  }
+  // Animate random windows flickering
+  setInterval(()=>{
+    const rects=g.querySelectorAll('rect');
+    const r=rects[Math.floor(Math.random()*rects.length)];
+    const isOn=Math.random()>.5;
+    r.setAttribute('fill',isOn?`rgba(100,180,255,${.2+Math.random()*.4})`:'rgba(255,255,255,.03)');
+  },400);
+}
+
+// ═══════════════════════════════════════════════════════
+// CROWD CANVAS (S5)
+// ═══════════════════════════════════════════════════════
+let crowdAnim=null;
+function drawCrowd(){
+  const c=document.getElementById('crowd-canvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const COUNT=100;
+  const orbs=Array.from({length:COUNT},(_,i)=>({
+    x:30+Math.random()*(W-60),y:30+Math.random()*(H-60),
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    isUser:i===50,
+    isClaim:Math.random()<.05,
+    r:i===50?7:3+Math.random()*2,
+    phase:Math.random()*Math.PI*2
+  }));
+  if(crowdAnim)cancelAnimationFrame(crowdAnim);
+  let t=0;
+  function loop(){
+    crowdAnim=requestAnimationFrame(loop);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='rgba(3,7,18,.95)';ctx.fillRect(0,0,W,H);
+    t+=.016;
+    orbs.forEach(o=>{
+      o.x+=o.vx;o.y+=o.vy;
+      if(o.x<10||o.x>W-10)o.vx*=-1;
+      if(o.y<10||o.y>H-10)o.vy*=-1;
+      const pulse=o.isUser?1+.15*Math.sin(t*3+o.phase):1;
+      ctx.beginPath();ctx.arc(o.x,o.y,o.r*pulse,0,Math.PI*2);
+      if(o.isUser){
+        const grd=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,14);
+        grd.addColorStop(0,'rgba(251,191,36,1)');grd.addColorStop(1,'rgba(251,191,36,0)');
+        ctx.fillStyle=grd;ctx.fill();
+        ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
+        ctx.fillStyle='#fbbf24';ctx.fill();
+        ctx.shadowBlur=15;ctx.shadowColor='#fbbf24';ctx.fill();ctx.shadowBlur=0;
+      } else if(o.isClaim){
+        ctx.fillStyle='rgba(239,68,68,.9)';ctx.fill();
+      } else {
+        ctx.fillStyle='rgba(30,80,160,.8)';ctx.fill();
+      }
+    });
+  }
+  loop();
+}
+
+// ═══════════════════════════════════════════════════════
+// GUESS MECHANIC (S6)
+// ═══════════════════════════════════════════════════════
+const QUESTIONS=[
+  {q:'Does your car\'s <strong>color</strong> affect your premium?',icon:'🎨',correct:false,twist:'WHERE you park at night matters. High-theft ZIP = +23%.'},
+  {q:'Safer cars = <strong>cheaper</strong> insurance?',icon:'🚗',correct:false,twist:'Volvo is safe but expensive to repair. Repair cost > safety rating.'},
+  {q:'Does your <strong>credit score</strong> affect your premium?',icon:'💳',correct:true,twist:'Only CA, HI & MA ban this. Poor credit = 76% higher rate in 46 states.'},
+  {q:'Moving 2 miles can change your rate by <strong>$4,000/yr</strong>?',icon:'📍',correct:true,twist:'Same driver, same car, different ZIP = $4,000 more in Detroit.'},
+];
+let guessScore=0;
+function buildGuess(){
+  const g=document.getElementById('guess-grid');
+  g.innerHTML=QUESTIONS.map((q,i)=>`
+    <div class="guess-card" id="gc${i}">
+      <div class="gc-icon">${q.icon}</div>
+      <p class="gc-q">${q.q}</p>
+      <div class="gc-btns">
+        <button class="gc-btn" onclick="answerGuess(${i},true)">👍 Yes</button>
+        <button class="gc-btn" onclick="answerGuess(${i},false)">👎 No</button>
+      </div>
+      <div class="gc-reveal" id="gr${i}"></div>
+    </div>
+  `).join('');
+}
+function answerGuess(i,yes){
+  const q=QUESTIONS[i];const card=document.getElementById('gc'+i);if(!card||card.classList.contains('answered'))return;
+  card.classList.add('answered');
+  const correct=yes===q.correct;
+  if(correct)guessScore++;
+  const btns=card.querySelectorAll('.gc-btn');
+  btns.forEach(b=>b.disabled=true);
+  const userBtn=btns[yes?0:1];const correctBtn=btns[q.correct?0:1];
+  correctBtn.classList.add('correct');
+  if(!correct)userBtn.classList.add('wrong');
+  const rev=document.getElementById('gr'+i);
+  rev.innerHTML=`<div class="${q.correct?'verdict-true':'verdict-false'}">${q.correct?'✅ TRUE':'❌ MYTH'}</div><div style="margin-top:4px;">${q.twist}</div>`;
+  rev.classList.add('show');
+  toast('💥','Myth Busted!','You got a surprise');
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME (S7)
+// ═══════════════════════════════════════════════════════
+const MOVES=[
+  {id:'telematics',label:'📱 Install telematics app',save:18},
+  {id:'deductible',label:'💸 Raise deductible $2,000',save:22},
+  {id:'course',label:'📚 Defensive driving course',save:9},
+  {id:'bundle',label:'🏠 Bundle with renter\'s',save:14},
+  {id:'credit',label:'📈 Improve credit 100 pts',save:31},
+];
+let gamePrice=127,gameSaved=0,applied=new Set();
+function buildGame(){
+  gamePrice=calcPrice();gameSaved=0;applied.clear();
+  document.getElementById('g-price').textContent=gamePrice;
+  document.getElementById('g-saved').textContent='$0';
+  document.getElementById('g-bar').style.width='0%';
+  document.getElementById('won-banner').classList.remove('show');
+  document.getElementById('moves-list').innerHTML=MOVES.map(m=>`
+    <div class="move" id="m-${m.id}">
+      <div><div class="move-label">${m.label}</div><div class="move-save">-$${m.save}/mo</div></div>
+      <button class="move-apply" id="mb-${m.id}" onclick="applyMove('${m.id}',${m.save})">Apply</button>
+    </div>
+  `).join('');
+}
+function applyMove(id,save){
+  if(applied.has(id))return;
+  applied.add(id);
+  gamePrice=Math.max(gamePrice-save,20);
+  gameSaved+=save;
+  animNum(document.getElementById('g-price'),gamePrice);
+  document.getElementById('g-saved').textContent='$'+gameSaved;
+  const prog=Math.min((gameSaved/(calcPrice()-80))*100,100);
+  document.getElementById('g-bar').style.width=prog+'%';
+  const btn=document.getElementById('mb-'+id);
+  btn.textContent='✓ Applied';btn.classList.add('done');btn.disabled=true;
+  document.getElementById('v-price').textContent=gamePrice;
+  if(gamePrice<=80){
+    setTimeout(()=>{document.getElementById('won-banner').classList.add('show');toast('🏆','System Beaten!','Under $80/month!');},500);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PROFILE LOGIC
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('.sel-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const g=btn.dataset.g,v=btn.dataset.v;
+    document.querySelectorAll(`.sel-btn[data-g="${g}"]`).forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');S[g]=isNaN(v)?v:parseInt(v);
+    updateProfile();
+  });
+});
+function updateProfile(){
+  const p=calcPrice(),r=calcRisk();
+  animNum(document.getElementById('p-price'),p);
+  document.getElementById('v-price').textContent=p;
+  document.getElementById('risk-fill').style.width=r+'%';
+  animNum(document.getElementById('risk-num'),r);
+  const af=PRICE.age[S.age],cf=PRICE.car[S.car],rf=PRICE.rec[S.rec];
+  document.getElementById('age-factor').textContent=(af>=0?'+$'+af:'-$'+Math.abs(af))+'/mo ('+AGE_LABEL[S.age]+')';
+  document.getElementById('car-factor').textContent=(cf===0?'+$0':'+$'+cf)+'/mo ('+CAR_LABEL[S.car]+')';
+  document.getElementById('rec-factor').textContent=(rf===0?'+$0':'+$'+rf)+'/mo ('+REC_LABEL[S.rec]+')';
+  gamePrice=p;
+  if(document.getElementById('g-price'))document.getElementById('g-price').textContent=p;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+const overlay=document.getElementById('fade-overlay');
+const scenes=document.querySelectorAll('.scene');
+const SCENE_NAMES=['Arrival','City','InsurCorp','Floor 27','Profile','Risk Pool','Myth Busters','Beat System','What\'s Next'];
+
+// Build dots
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('div');d.className='dot'+(i===0?' on':'');
+  d.title=SCENE_NAMES[i];d.onclick=()=>goTo(i);dotsEl.appendChild(d);
+}
+
+function goTo(n){
+  if(busy||n===cur||n<0||n>=TOTAL)return;
+  busy=true;
+  // Fade out
+  overlay.style.opacity=1;
+  setTimeout(()=>{
+    scenes[cur].classList.remove('active');
+    cur=n;
+    scenes[cur].classList.add('active');
+    onSceneEnter(n);
+    updateNav();
+    // Fade in
+    setTimeout(()=>{overlay.style.opacity=0;setTimeout(()=>busy=false,400);},200);
+  },350);
+}
+function next(){goTo(cur+1);}
+function prev(){goTo(cur-1);}
+function updateNav(){
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.className='dot'+(i<cur?' done':'')+(i===cur?' on':'');
+  });
+  document.getElementById('prev-btn').style.opacity=cur>0?1:0;
+  document.getElementById('next-btn').style.opacity=cur<TOTAL-1?1:0;
+  document.getElementById('scene-indicator').textContent=`${cur+1} / ${TOTAL} — ${SCENE_NAMES[cur].toUpperCase()}`;
+}
+function onSceneEnter(n){
+  if(n===1){setTimeout(drawCity,100);}
+  if(n===2){drawBuildingWindows();animateStats();}
+  if(n===3){startElevator();}
+  if(n===4){updateProfile();}
+  if(n===5){drawCrowd();}
+  if(n===6){buildGuess();}
+  if(n===7){buildGame();}
+  const ach=[
+    {icon:'🚀',title:'You\'re Inside',sub:'Experience started'},
+    {icon:'🌆',title:'City Found',sub:'180 companies watching you'},
+    {icon:'🏢',title:'InsurCorp',sub:'Floor 27 awaits'},
+    {icon:'⬆',title:'Going Up',sub:'To the Risk Department'},
+    {icon:'🎯',title:'Profile Built',sub:'Your risk is calculated'},
+    {icon:'👥',title:'You saw the 1,000',sub:'The risk pool revealed'},
+    {icon:'💥',title:'Myth Buster',sub:'The truth revealed'},
+    {icon:'🎮',title:'Player Mode',sub:'Gaming the system'},
+    {icon:'🌟',title:'Full Run!',sub:'Top 60% of visitors'},
+  ];
+  setTimeout(()=>toast(ach[n].icon,ach[n].title,ach[n].sub),600);
+}
+
+// Keyboard
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')next();
+  if(e.key==='ArrowLeft')prev();
+  if(e.key==='ArrowDown')next();
+  if(e.key==='ArrowUp')prev();
+});
+// Wheel
+let wlock=false;
+window.addEventListener('wheel',e=>{
+  if(wlock)return;wlock=true;
+  if(e.deltaY>20)next();else if(e.deltaY<-20)prev();
+  setTimeout(()=>wlock=false,800);
+},{passive:true});
+// Touch
+let tx=0,ty=0;
+window.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+window.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>40||Math.abs(dy)>40){if(dx<-30||dy<-30)next();else prev();}
+},{passive:true});
+
+// ═══════════════════════════════════════════════════════
+// ELEVATOR ANIMATION
+// ═══════════════════════════════════════════════════════
+function startElevator(){
+  const car=document.getElementById('elevator-car');
+  const num=document.getElementById('floor-num');
+  const cnt=document.getElementById('floor-count');
+  if(!car)return;
+  car.style.transform='translateY(0)';
+  num.textContent='1';
+  let f=0,t=3;
+  const ct=setInterval(()=>{t--;cnt.textContent=t;if(t<=0)clearInterval(ct);},1000);
+  setTimeout(()=>{
+    car.style.transform='translateY(-110px)';
+    let fl=1;
+    const fi=setInterval(()=>{fl+=2;num.textContent=fl;if(fl>=27){num.textContent=27;clearInterval(fi);}},80);
+  },1000);
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILDING STAT ANIMATION (S2)
+// ═══════════════════════════════════════════════════════
+function animateStats(){
+  const vals=document.querySelectorAll('.stat-val');
+  const targets=[342,47,0.3];
+  const isDecimal=[false,false,true];
+  vals.forEach((v,i)=>{
+    let cur=0;const dur=1200;const t0=performance.now();
+    function step(now){
+      const p=Math.min((now-t0)/dur,1);
+      const e=1-Math.pow(1-p,3);
+      v.textContent=isDecimal[i]?(cur+targets[i]*e).toFixed(1):Math.round(targets[i]*e);
+      if(p<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastQ=[],toasting=false;
+function toast(icon,title,sub){
+  toastQ.push({icon,title,sub});
+  if(!toasting)nextToast();
+}
+function nextToast(){
+  if(!toastQ.length){toasting=false;return;}
+  toasting=true;const{icon,title,sub}=toastQ.shift();
+  const t=document.getElementById('toast');
+  document.getElementById('t-icon').textContent=icon;
+  document.getElementById('t-title').textContent=title;
+  document.getElementById('t-sub').textContent=sub;
+  t.classList.add('show');
+  setTimeout(()=>{t.classList.remove('show');setTimeout(nextToast,600);},3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// SHARING
+// ═══════════════════════════════════════════════════════
+function shareX(){
+  const p=calcPrice();
+  const text=`My car insurance: $${p}/mo. Can you get below $80? Try the simulation 👇`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent('https://inside-things.vercel.app')}`, '_blank');
+}
+function copyLink(){
+  const p=calcPrice();
+  const text=`My car insurance: $${p}/mo. Can you get below $80?\nhttps://inside-things.vercel.app`;
+  navigator.clipboard.writeText(text).then(()=>{
+    document.getElementById('copy-msg').textContent='✓ Copied!';
+    setTimeout(()=>document.getElementById('copy-msg').textContent='',3000);
+  });
+}
+async function subscribe(){
+  const email=document.getElementById('email').value;
+  if(!email||!email.includes('@')){document.getElementById('sub-msg').textContent='Please enter a valid email.';return;}
+  document.getElementById('sub-msg').textContent='Saving...';
+  try{
+    const res=await fetch('https://dagdyyspelsdokfrwzct.supabase.co/rest/v1/subscribers',{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhZ2R5eXNwZWxzZG9rZnJ3emN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjIwOTYsImV4cCI6MjEwMTYzODA5Nn0.wRD7crpV1c-LTr9Unbgw0lhYZPAfMMKYTPEiuxPMMmI','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhZ2R5eXNwZWxzZG9rZnJ3emN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjIwOTYsImV4cCI6MjEwMTYzODA5Nn0.wRD7crpV1c-LTr9Unbgw0lhYZPAfMMKYTPEiuxPMMmI'},
+      body:JSON.stringify({email,source:'inside-insurance'})
+    });
+    document.getElementById('sub-msg').textContent=res.ok?'✓ You\'re on the list!':'✓ Saved!';
+  }catch{document.getElementById('sub-msg').textContent='✓ You\'re on the list!';}
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function animNum(el,target){
+  if(!el)return;
+  const start=parseInt(el.textContent)||0,diff=target-start,dur=600,t0=performance.now();
+  function step(now){
+    const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(start+diff*e);if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+function mulberry32(seed){
+  return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;
+    let t=Math.imul(seed^(seed>>>15),1|seed);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};
+}
+
+// Cursor glow
+const cg=document.getElementById('cg');
+window.addEventListener('mousemove',e=>{cg.style.transform=`translate(${e.clientX-150}px,${e.clientY-150}px)`;});
+
+// Live counter
+let liveN=1200+Math.floor(Math.random()*200);
+const liveEl=document.getElementById('live-count');
+liveEl.textContent=liveN.toLocaleString();
+setInterval(()=>{liveN=Math.max(liveN+Math.floor(Math.random()*7)-2,800);liveEl.textContent=liveN.toLocaleString();},4000);
+
+// Init
+updateNav();
+toast('🚀','You\'re Inside','Experience started');
+</script>
 </body>
 </html>
