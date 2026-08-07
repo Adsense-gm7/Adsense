@@ -6,8 +6,8 @@
 // ── Supabase Config ──────────────────────────────────────────
 // These values are injected by Vercel environment variables
 // For local dev: create a .env.local file (see .env.example)
-const SUPABASE_URL     = window.SUPABASE_URL     || '__SUPABASE_URL__';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '__SUPABASE_ANON_KEY__';
+const SUPABASE_URL      = 'https://dagdyyspelsdokfrwzct.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhZ2R5eXNwZWxzZG9rZnJ3emN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjIwOTYsImV4cCI6MjEwMTYzODA5Nn0.wRD7crpV1c-LTr9Unbgw0lhYZPAfMMKYTPEiuxPMMmI';
 
 // Load Supabase from CDN
 const { createClient } = supabase;
