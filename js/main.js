@@ -91,6 +91,10 @@ function updatePrice() {
   const price = calcPrice();
   animateNum(livePrice, price);
 
+  // Sync viral card price
+  const viralPriceEl = document.getElementById('viral-price');
+  if (viralPriceEl) animateNum(viralPriceEl, price);
+
   // bar: map $40–$500 → 5%–100%
   const pct = Math.min(Math.max((price - 40) / (500 - 40) * 100, 5), 100);
   priceBarFill.style.width = pct + '%';
@@ -122,6 +126,79 @@ function selectRecord(btn) {
   updatePrice();
   updateScene2Data();
   updateScene3Data();
+}
+
+/* ── Guess Mechanic ── */
+let guessScore = { correct: 0, total: 0 };
+
+function makeGuess(id, guess, correctAnswer, btn) {
+  const card       = document.getElementById(`surprise-${id}`);
+  const resultEl   = document.getElementById(`gr-${id}`);
+  const allBtns    = btn.closest('.guess-btns').querySelectorAll('.guess-btn');
+
+  // Disable all buttons for this card
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = (guess === 'yes') === correctAnswer;
+  guessScore.total++;
+  if (isCorrect) guessScore.correct++;
+
+  // Highlight buttons
+  allBtns.forEach(b => {
+    const btnGuess = b.textContent.includes('Yes') ? 'yes' : 'no';
+    const btnCorrect = (btnGuess === 'yes') === correctAnswer;
+    if (btnCorrect)                          b.classList.add('correct');
+    else if (b === btn && !isCorrect)        b.classList.add('wrong');
+  });
+
+  // Show result message
+  if (resultEl) {
+    resultEl.textContent = isCorrect ? '✓ You got it right!' : '✗ Most people get this wrong too.';
+    resultEl.className   = `guess-result ${isCorrect ? 'correct-msg' : 'wrong-msg'}`;
+  }
+
+  // Flip card after short delay
+  setTimeout(() => {
+    if (card) card.classList.add('revealed');
+    trackSurpriseReveal(id);
+  }, 600);
+}
+
+/* ── Viral Share ── */
+function viralShare(type) {
+  const price = calcPrice();
+  const url   = 'https://inside-things.vercel.app';
+  const text  = `My car insurance estimate: $${price}/mo. Can you get below $80? Try the simulation 👇`;
+
+  if (type === 'twitter') {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  } else {
+    const fullText = `${text}\n${url}`;
+    navigator.clipboard.writeText(fullText).then(() => {
+      const el = document.getElementById('viral-copied');
+      if (el) {
+        el.textContent = '✓ Copied! Paste it anywhere.';
+        setTimeout(() => { el.textContent = ''; }, 3000);
+      }
+    });
+  }
+  trackEvent('viral_share', 6, { type, price });
+}
+
+/* ── Live Counter (simulated with Supabase session count) ── */
+function animateLiveCounter() {
+  const el = document.getElementById('sp-live');
+  if (!el) return;
+  const base = 1200 + Math.floor(Math.random() * 200);
+  let current = base;
+  el.textContent = current.toLocaleString();
+
+  // Randomly increment/decrement every few seconds to feel live
+  setInterval(() => {
+    const delta = Math.floor(Math.random() * 7) - 2;
+    current = Math.max(current + delta, 800);
+    el.textContent = current.toLocaleString();
+  }, 4000);
 }
 
 /* ── Scene Navigation ── */
@@ -201,3 +278,5 @@ function shareExperience(type) {
 
 /* ── Init ── */
 updatePrice();
+animateLiveCounter();
+

@@ -42,17 +42,36 @@
         <span class="line-reveal delay-1">car insurance</span>
         <span class="line-reveal delay-2 accent-text">so expensive?</span>
       </h1>
-      <p class="hero-sub line-reveal delay-3">
-        Stop reading articles. Enter the insurance company.<br />
-        See exactly how they calculate <em>your</em> price.
-      </p>
-      <div class="hero-stats line-reveal delay-4">
-        <div class="stat-pill">🔍 135,000 searches/month</div>
-        <div class="stat-pill">⏱ 8 min experience</div>
-        <div class="stat-pill">🎮 Interactive simulation</div>
+
+      <!-- ── QUICK ANSWER (Answer First) ── -->
+      <div class="quick-answer line-reveal delay-3">
+        <div class="qa-label">⚡ Quick Answer</div>
+        <div class="qa-text">
+          Insurance companies pool risk across <strong>thousands of drivers</strong>. Your price is based on your <strong>age, car type, driving record, credit score, and ZIP code</strong> — not just your own history. Young drivers with sports cars in urban areas can pay <strong>3–5× more</strong> than a 45-year-old with a sedan in the suburbs.
+        </div>
+        <div class="qa-divider">Want to see exactly how they calculated <em>yours</em>?</div>
       </div>
+
+      <!-- ── SOCIAL PROOF ── -->
+      <div class="social-proof line-reveal delay-4">
+        <div class="sp-item">
+          <div class="sp-num" id="sp-live">1,247</div>
+          <div class="sp-label">inside right now</div>
+        </div>
+        <div class="sp-divider"></div>
+        <div class="sp-item">
+          <div class="sp-num">84%</div>
+          <div class="sp-label">guessed wrong on Q1</div>
+        </div>
+        <div class="sp-divider"></div>
+        <div class="sp-item">
+          <div class="sp-num">2 min</div>
+          <div class="sp-label">average to finish</div>
+        </div>
+      </div>
+
       <button id="btn-start" class="btn-primary line-reveal delay-5" onclick="startExperience()">
-        <span>Enter InsurCorp</span>
+        <span>Start the Experience</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
@@ -342,74 +361,89 @@
     </div>
   </section>
 
-  <!-- ████ SCENE 4 — SURPRISE MOMENTS ████ -->
+  <!-- ████ SCENE 4 — GUESS MECHANIC ████ -->
   <section id="scene-4" class="scene">
     <div class="scene-inner">
-      <div class="scene-label">Chapter 04</div>
-      <h2 class="scene-title">Things you didn't know.</h2>
-      <p class="scene-sub">The insurance industry keeps these <span class="glow-text">surprisingly quiet.</span></p>
+      <div class="scene-label">Chapter 04 · Quick Quiz</div>
+      <h2 class="scene-title">What do you think?</h2>
+      <p class="scene-sub">Make your guess first. <span class="glow-text">84% of people get at least one wrong.</span></p>
 
       <div class="surprises-grid">
 
-        <div class="surprise-card" id="surprise-1" onclick="revealSurprise(1)">
+        <div class="surprise-card" id="surprise-1">
           <div class="surprise-front">
             <div class="surprise-icon">🎨</div>
             <div class="surprise-question">Does your car's <strong>color</strong> affect your premium?</div>
-            <div class="reveal-hint">Tap to find out</div>
+            <div class="guess-btns">
+              <button class="guess-btn" onclick="makeGuess(1,'yes',false,this)">👍 Yes</button>
+              <button class="guess-btn" onclick="makeGuess(1,'no',false,this)">👎 No</button>
+            </div>
           </div>
           <div class="surprise-back">
-            <div class="surprise-verdict false">❌ MYTH</div>
+            <div class="surprise-verdict false">❌ MYTH — Color never matters</div>
             <div class="surprise-answer">
-              Color is <strong>never</strong> factored into insurance pricing. Red cars don't cost more to insure — that's a complete myth that's been around since the 1950s.
+              Color is <strong>never</strong> factored into insurance pricing. Red cars don't cost more — that's a myth since the 1950s.
             </div>
             <div class="surprise-twist">
               <span class="twist-label">But here's the twist →</span>
-              WHERE you park at night matters a lot. Cars parked on streets in high-theft ZIP codes cost 23% more to insure.
+              WHERE you park at night matters. High-theft ZIP codes = +23% premium.
             </div>
+            <div class="guess-result" id="gr-1"></div>
           </div>
         </div>
 
-        <div class="surprise-card" id="surprise-2" onclick="revealSurprise(2)">
+        <div class="surprise-card" id="surprise-2">
           <div class="surprise-front">
             <div class="surprise-icon">🚗</div>
             <div class="surprise-question">Safer cars = <strong>cheaper</strong> insurance?</div>
-            <div class="reveal-hint">Tap to find out</div>
+            <div class="guess-btns">
+              <button class="guess-btn" onclick="makeGuess(2,'yes',false,this)">👍 Yes</button>
+              <button class="guess-btn" onclick="makeGuess(2,'no',false,this)">👎 No</button>
+            </div>
           </div>
           <div class="surprise-back">
             <div class="surprise-verdict false">❌ NOT ALWAYS</div>
             <div class="surprise-answer">
-              Volvo is one of the safest cars on earth. But it's also one of the <strong>most expensive to repair</strong> after a crash. So its insurance can be higher than a "less safe" car.
+              Volvo = safest car on earth. Also one of the <strong>most expensive to repair</strong>. Its insurance can be higher than a "less safe" car.
             </div>
             <div class="surprise-twist">
-              <span class="twist-label">What companies actually care about →</span>
+              <span class="twist-label">Companies actually care about →</span>
               Repair cost + theft rate + rollover risk. Not just safety stars.
             </div>
+            <div class="guess-result" id="gr-2"></div>
           </div>
         </div>
 
-        <div class="surprise-card" id="surprise-3" onclick="revealSurprise(3)">
+        <div class="surprise-card" id="surprise-3">
           <div class="surprise-front">
             <div class="surprise-icon">💳</div>
-            <div class="surprise-question">Your <strong>credit score</strong> affects your premium?</div>
-            <div class="reveal-hint">Tap to find out</div>
+            <div class="surprise-question">Does your <strong>credit score</strong> affect your premium?</div>
+            <div class="guess-btns">
+              <button class="guess-btn" onclick="makeGuess(3,'yes',true,this)">👍 Yes</button>
+              <button class="guess-btn" onclick="makeGuess(3,'no',true,this)">👎 No</button>
+            </div>
           </div>
           <div class="surprise-back">
-            <div class="surprise-verdict true">✅ TRUE (in 46 states)</div>
+            <div class="surprise-verdict true">✅ TRUE — In 46 states</div>
             <div class="surprise-answer">
-              Drivers with poor credit pay up to <strong>76% more</strong> for the same coverage. Insurance companies found that credit score is a strong predictor of claims — even if that feels unfair.
+              Poor credit = up to <strong>76% more</strong> for the same coverage. Credit score predicts claims better than driving history.
             </div>
             <div class="surprise-twist">
-              <span class="twist-label">Only California, Hawaii & Massachusetts ban this practice →</span>
-              In those states, your credit score legally cannot affect your premium.
+              <span class="twist-label">Only CA, HI & MA ban this →</span>
+              In those states, your credit score cannot legally affect your rate.
             </div>
+            <div class="guess-result" id="gr-3"></div>
           </div>
         </div>
 
-        <div class="surprise-card" id="surprise-4" onclick="revealSurprise(4)">
+        <div class="surprise-card" id="surprise-4">
           <div class="surprise-front">
             <div class="surprise-icon">📍</div>
-            <div class="surprise-question">Moving 2 miles changes <strong>your rate?</strong></div>
-            <div class="reveal-hint">Tap to find out</div>
+            <div class="surprise-question">Moving 2 miles can change your rate by <strong>$4,000/year?</strong></div>
+            <div class="guess-btns">
+              <button class="guess-btn" onclick="makeGuess(4,'yes',true,this)">👍 Yes</button>
+              <button class="guess-btn" onclick="makeGuess(4,'no',true,this)">👎 No</button>
+            </div>
           </div>
           <div class="surprise-back">
             <div class="surprise-verdict true">✅ YES — Dramatically</div>
@@ -420,6 +454,7 @@
               <span class="twist-label">Why? →</span>
               Accident density, theft reports, hospital costs, and lawsuit frequency are all ZIP-specific. You're not just paying for your risk — you're paying for your neighborhood's risk.
             </div>
+            <div class="guess-result" id="gr-4"></div>
           </div>
         </div>
 
@@ -535,6 +570,24 @@
           Now you know how they <span class="accent-text">set</span> your price.
         </h2>
         <p class="cliff-sub">But here's what they don't tell you...</p>
+      </div>
+
+      <!-- VIRAL CHALLENGE CARD -->
+      <div class="viral-card">
+        <div class="viral-label">🎯 Challenge a friend</div>
+        <div class="viral-result">
+          My insurance: <strong>$<span id="viral-price">127</span>/mo</strong>
+        </div>
+        <div class="viral-question">Can you get below <strong>$80</strong>?</div>
+        <div class="viral-btns">
+          <button class="viral-btn primary" onclick="viralShare('twitter')">
+            𝕏 Challenge on X
+          </button>
+          <button class="viral-btn secondary" onclick="viralShare('copy')">
+            🔗 Copy Challenge Link
+          </button>
+        </div>
+        <div id="viral-copied" class="viral-copied"></div>
       </div>
 
       <div class="cliff-question">
