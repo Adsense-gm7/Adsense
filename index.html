@@ -365,8 +365,407 @@ button { border: 0; font: inherit; }
    SIMULATOR SECTION (below cinema scroll)
    Mostar palette: cream + dark
    ══════════════════════════════════════════ */
-.simulator-shell {
-  background: #0b1110; padding: 0;
+/* ══════════════════════════════════════
+   CINEMATIC CHAPTER SYSTEM
+   ══════════════════════════════════════ */
+
+/* Chapter wrapper — sticky scroll */
+.chapter {
+  position: relative;
+  background: #0b1110;
+}
+.chapter-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Chapter label (top-left) */
+.ch-label {
+  position: absolute;
+  top: 32px; left: 40px;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(253,241,225,0.3); font-weight: 600;
+  pointer-events: none;
+}
+
+/* ── Chapter 1: Profile ── */
+.ch-profile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+}
+.ch-profile-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px;
+  border-right: 1px solid rgba(253,241,225,0.06);
+}
+.ch-profile-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fdf1e1;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Factor group */
+.factor-group { margin-bottom: 32px; }
+.factor-group:last-child { margin-bottom: 0; }
+.fg-label {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(253,241,225,0.35); font-weight: 700; margin-bottom: 10px; display: block;
+}
+.fg-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.fg-btn {
+  padding: 11px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  color: rgba(253,241,225,0.45); background: rgba(253,241,225,0.04);
+  border: 1px solid rgba(253,241,225,0.1); cursor: pointer; font-family: inherit;
+  transition: all 0.2s ease; white-space: nowrap;
+}
+.fg-btn:hover { color: #fdf1e1; border-color: rgba(253,241,225,0.3); background: rgba(253,241,225,0.08); }
+.fg-btn.on {
+  color: #111411; background: #fdf1e1; border-color: #fdf1e1;
+  box-shadow: 0 4px 20px rgba(253,241,225,0.25);
+}
+
+/* Price display — RIGHT side */
+.price-display-wrap {
+  text-align: center;
+  position: relative; z-index: 1;
+}
+.price-eyebrow {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(17,20,17,0.4); font-weight: 600; margin-bottom: 16px;
+}
+.price-hero {
+  font-family: "Ogg Medium", serif;
+  font-size: clamp(4rem, 9vw, 8rem);
+  font-weight: 500; line-height: 0.85;
+  color: #111411;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.price-hero.bump {
+  transform: scale(1.06);
+}
+.price-hero span { display: inline-block; }
+.price-period {
+  font-size: 1.3rem; font-weight: 400; color: rgba(17,20,17,0.45);
+  display: block; margin-top: 8px;
+}
+.risk-gauge {
+  margin-top: 32px;
+  width: 180px;
+}
+.rg-track {
+  height: 5px; background: rgba(17,20,17,0.12);
+  border-radius: 999px; overflow: hidden; margin-bottom: 6px;
+}
+.rg-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%);
+  border-radius: 999px; transition: width 0.5s ease;
+}
+.rg-label { font-size: 12px; color: rgba(17,20,17,0.5); }
+
+/* Floating factor deltas */
+.delta-stack {
+  position: absolute;
+  top: 50%; right: -120px;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.delta-pill {
+  font-family: "Ogg Medium", serif;
+  font-size: 15px; font-weight: 500;
+  padding: 6px 14px; border-radius: 999px;
+  background: rgba(17,20,17,0.07);
+  color: rgba(17,20,17,0.7);
+  border: 1px solid rgba(17,20,17,0.12);
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+.delta-pill.neg { color: #166534; background: rgba(22,101,52,0.08); border-color: rgba(22,101,52,0.15); }
+.delta-pill.pos { color: #991b1b; background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.15); }
+
+/* Scroll cue */
+.scroll-cue {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(253,241,225,0.25); pointer-events: none;
+  animation: cue-bob 2s ease-in-out infinite;
+}
+.scroll-cue::after {
+  content: '';
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(253,241,225,0.25), transparent);
+}
+@keyframes cue-bob { 0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)} }
+
+/* ── Chapter 2: Pool (full-screen canvas) ── */
+.ch-pool {
+  width: 100%; height: 100%; position: relative;
+}
+#pool-canvas {
+  position: absolute; inset: 0; width: 100% !important; height: 100% !important;
+}
+.pool-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(11,17,16,0.85) 100%);
+}
+.pool-text-center {
+  text-align: center; max-width: 560px; padding: 40px;
+}
+.pool-math {
+  font-family: "Ogg Medium", serif;
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+  font-weight: 500; line-height: 1.2; color: #fdf1e1;
+  margin-bottom: 16px;
+}
+.pool-math .eq { color: rgba(253,241,225,0.5); }
+.pool-sub {
+  font-size: 1rem; color: rgba(253,241,225,0.5); line-height: 1.6;
+}
+.you-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 999px;
+  background: rgba(253,241,225,0.1); border: 1px solid rgba(253,241,225,0.2);
+  font-size: 13px; font-weight: 600; color: #fdf1e1;
+  margin-top: 20px;
+}
+.you-dot { width: 10px; height: 10px; border-radius: 50%; background: #fdf1e1; }
+
+/* ── Chapter 3: Myths (slide-by-slide) ── */
+.ch-myths {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 60px 40px;
+}
+.myth-slide {
+  width: min(700px, 100%);
+  display: none;
+}
+.myth-slide.active { display: block; }
+.myth-num {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(253,241,225,0.3); font-weight: 600; margin-bottom: 24px;
+}
+.myth-q {
+  font-family: "Ogg Medium", serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500; line-height: 1.05; color: #fdf1e1;
+  margin-bottom: 36px;
+}
+.myth-choices {
+  display: flex; gap: 14px; flex-wrap: wrap;
+}
+.myth-btn {
+  flex: 1; min-width: 140px;
+  padding: 20px 28px; border-radius: 18px;
+  font-family: "Ogg Medium", serif; font-size: 1.5rem; font-weight: 500;
+  cursor: pointer; transition: all 0.25s ease;
+  border: 1.5px solid rgba(253,241,225,0.2);
+  background: rgba(253,241,225,0.04); color: #fdf1e1;
+  text-align: center;
+}
+.myth-btn:hover { background: rgba(253,241,225,0.09); border-color: rgba(253,241,225,0.4); transform: translateY(-2px); }
+.myth-btn.correct { background: rgba(22,101,52,0.2); border-color: rgba(22,101,52,0.5); color: #86efac; }
+.myth-btn.wrong   { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #fca5a5; opacity: 0.7; }
+.myth-reveal {
+  margin-top: 28px; padding: 22px 26px;
+  background: rgba(253,241,225,0.05); border: 1px solid rgba(253,241,225,0.1);
+  border-radius: 14px; font-size: 1rem; color: rgba(253,241,225,0.7); line-height: 1.65;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+.myth-reveal.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.myth-reveal strong { color: #fdf1e1; }
+.myth-next {
+  margin-top: 16px; padding: 12px 28px; border-radius: 999px;
+  background: #fdf1e1; color: #111411; border: none;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  display: none;
+}
+.myth-next.show { display: inline-flex; align-items: center; gap: 8px; }
+.myth-progress {
+  position: absolute; top: 32px; right: 40px;
+  display: flex; gap: 8px; align-items: center;
+}
+.mp-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(253,241,225,0.2); transition: background 0.3s;
+}
+.mp-dot.done  { background: rgba(253,241,225,0.6); }
+.mp-dot.on    { background: #fdf1e1; }
+
+/* ── Chapter 4: Game ── */
+.ch-game {
+  width: 100%; height: 100%;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+}
+.game-left {
+  background: #fdf1e1;
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 80px 60px;
+  position: relative; overflow: hidden;
+}
+.game-right {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 80px 60px;
+  overflow-y: auto;
+}
+.game-eyebrow {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(17,20,17,0.35); font-weight: 600; margin-bottom: 16px;
+}
+.game-price-big {
+  font-family: "Ogg Medium", serif;
+  font-size: clamp(4.5rem, 8vw, 8rem);
+  font-weight: 500; line-height: 0.85; color: #111411;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.game-price-mo { font-size: 1.5rem; color: rgba(17,20,17,0.4); font-weight: 400; }
+.game-target-label {
+  font-size: 13px; color: rgba(17,20,17,0.45); margin-top: 16px;
+}
+.game-bar-wrap { margin-top: 12px; }
+.game-bar-track { height: 4px; background: rgba(17,20,17,0.1); border-radius: 999px; overflow: hidden; }
+.game-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+  border-radius: 999px; transition: width 0.5s ease;
+}
+.game-saved { font-size: 13px; color: rgba(17,20,17,0.45); margin-top: 8px; }
+.game-won-msg {
+  margin-top: 24px; padding: 20px 24px;
+  background: rgba(22,101,52,0.1); border: 1px solid rgba(22,101,52,0.25);
+  border-radius: 14px; font-family: "Ogg Medium", serif;
+  font-size: 1.5rem; font-weight: 500; color: #166534;
+  display: none;
+}
+.game-won-msg.show { display: block; }
+
+/* Game moves */
+.game-moves-title {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(253,241,225,0.35); font-weight: 600; margin-bottom: 20px;
+}
+.gmove {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-radius: 14px; gap: 12px;
+  border: 1.5px solid rgba(253,241,225,0.1);
+  background: rgba(253,241,225,0.03);
+  margin-bottom: 10px; transition: all 0.25s ease;
+}
+.gmove:hover { border-color: rgba(253,241,225,0.25); background: rgba(253,241,225,0.06); }
+.gmove.done { border-color: rgba(22,101,52,0.3); background: rgba(22,101,52,0.06); opacity: 0.7; }
+.gmove-info { flex: 1; }
+.gmove-name { font-size: 14px; font-weight: 500; color: rgba(253,241,225,0.8); line-height: 1.3; }
+.gmove-save { font-size: 13px; font-weight: 700; color: #86efac; margin-top: 3px; }
+.gmove-apply {
+  padding: 9px 18px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  color: #fdf1e1; background: rgba(253,241,225,0.1);
+  border: 1px solid rgba(253,241,225,0.2);
+  cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.gmove-apply:hover:not(:disabled) { background: rgba(253,241,225,0.18); }
+.gmove-apply.done { background: rgba(22,101,52,0.15); border-color: rgba(22,101,52,0.3); color: #86efac; cursor: default; }
+
+/* ── Chapter 5: End ── */
+.ch-end {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 60px 40px;
+  position: relative;
+}
+.end-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 999px;
+  background: rgba(253,241,225,0.08); border: 1px solid rgba(253,241,225,0.15);
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(253,241,225,0.55); font-weight: 600; margin-bottom: 28px;
+}
+.end-title {
+  font-family: "Ogg Medium", serif;
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 500; line-height: 0.95; color: #fdf1e1;
+  max-width: 720px; margin-bottom: 16px;
+}
+.end-sub {
+  font-size: 1.05rem; color: rgba(253,241,225,0.5);
+  line-height: 1.65; max-width: 520px; margin-bottom: 40px;
+}
+.end-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+.end-btn-primary {
+  padding: 15px 32px; border-radius: 999px; border: none;
+  background: #fdf1e1; color: #111411;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 30px rgba(253,241,225,0.2);
+}
+.end-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(253,241,225,0.3); }
+.end-btn-ghost {
+  padding: 15px 32px; border-radius: 999px;
+  background: rgba(253,241,225,0.05); border: 1px solid rgba(253,241,225,0.15);
+  color: rgba(253,241,225,0.7); font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.end-btn-ghost:hover { background: rgba(253,241,225,0.1); color: #fdf1e1; }
+.end-email-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 460px; }
+.end-email-inp {
+  flex: 1; min-width: 220px;
+  background: rgba(253,241,225,0.06); border: 1px solid rgba(253,241,225,0.15);
+  border-radius: 999px; padding: 14px 22px; font-size: 14px;
+  color: #fdf1e1; outline: none; font-family: inherit;
+}
+.end-email-inp:focus { border-color: rgba(253,241,225,0.4); }
+.end-email-sub {
+  padding: 14px 24px; border-radius: 999px; border: none;
+  background: #fdf1e1; color: #111411; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.end-status { font-size: 13px; color: rgba(253,241,225,0.5); margin-top: 10px; min-height: 20px; }
+.end-copy-status { font-size: 13px; color: rgba(253,241,225,0.5); margin-top: 8px; min-height: 18px; }
+
+/* Chapter scroll triggers */
+.ch-scroll-space { height: 100vh; pointer-events: none; }
+
+/* Responsive */
+@media (max-width: 860px) {
+  .ch-profile, .ch-game { grid-template-columns: 1fr; }
+  .ch-profile-right { padding: 40px; min-height: 40vh; }
+  .ch-profile-left { padding: 40px; }
+  .game-left { padding: 40px; min-height: 35vh; }
+  .game-right { padding: 40px; }
+  .myth-q { font-size: 1.8rem; }
+  .myth-btn { padding: 16px 20px; font-size: 1.2rem; }
+  .delta-stack { display: none; }
+}
+@media (max-width: 540px) {
+  .ch-label { left: 20px; top: 20px; }
+  .myth-progress { right: 20px; top: 20px; }
+  .ch-myths { padding: 40px 20px; }
+  .game-right { overflow-y: auto; }
+  .end-title { font-size: 2rem; }
 }
 .sim-section {
   max-width: 1100px; margin: 0 auto; padding: 100px 40px;
@@ -662,145 +1061,142 @@ button { border: 0; font: inherit; }
 </section>
 
 <!-- ════════════════════════════════════════
-     INTERACTIVE SIMULATOR
+     CINEMATIC SIMULATOR — 5 Chapters
      ════════════════════════════════════════ -->
-<div class="simulator-shell" id="simulator">
 
-  <!-- 1. Profile Builder -->
-  <section class="sim-section">
-    <span class="sim-tag">Chapter 01 · Floor 27 Risk Department</span>
-    <h2 class="sim-h2">Build your risk profile.</h2>
-    <p class="sim-sub">Every choice updates your monthly premium in real time. This is exactly how the algorithm sees you.</p>
-    <div class="profile-two-col">
-      <div>
-        <div class="p-label">Age</div>
-        <div class="btn-row">
-          <button class="sel-btn on" data-g="age" data-v="19">19 · New driver</button>
-          <button class="sel-btn" data-g="age" data-v="25">25 · Young adult</button>
-          <button class="sel-btn" data-g="age" data-v="35">35 · Experienced</button>
-          <button class="sel-btn" data-g="age" data-v="45">45 · Veteran</button>
-        </div>
-        <div class="p-label">Car Type</div>
-        <div class="btn-row">
-          <button class="sel-btn on" data-g="car" data-v="economy">🚗 Economy</button>
-          <button class="sel-btn" data-g="car" data-v="sports">🏎 Sports</button>
-          <button class="sel-btn" data-g="car" data-v="suv">🚙 SUV</button>
-          <button class="sel-btn" data-g="car" data-v="luxury">✨ Luxury</button>
-        </div>
-        <div class="p-label">Driving Record</div>
-        <div class="btn-row">
-          <button class="sel-btn on" data-g="rec" data-v="clean">✅ Clean</button>
-          <button class="sel-btn" data-g="rec" data-v="ticket">⚠️ Ticket</button>
-          <button class="sel-btn" data-g="rec" data-v="accident">🚨 Accident</button>
-          <button class="sel-btn" data-g="rec" data-v="dui">🔴 DUI</button>
-        </div>
-      </div>
-      <div class="sim-card-cream">
-        <div class="price-lbl">Monthly Premium</div>
-        <div class="price-big">$<span id="p-price">127</span><span class="price-mo">/mo</span></div>
-        <div class="risk-bar"><div class="risk-fill" id="risk-fill" style="width:55%"></div></div>
-        <div class="risk-txt">Risk Score: <strong id="risk-num">62</strong>/100</div>
-        <div style="margin-top:24px;">
-          <div class="factor-item"><span class="factor-name">Age factor</span><span class="factor-val" id="age-val">+$92</span></div>
-          <div class="factor-item"><span class="factor-name">Car factor</span><span class="factor-val" id="car-val">+$0</span></div>
-          <div class="factor-item"><span class="factor-name">Record factor</span><span class="factor-val" id="rec-val">+$0</span></div>
-          <div class="factor-item"><span class="factor-name">Base rate</span><span class="factor-val">$127</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. Risk Pool -->
-  <section class="sim-section">
-    <span class="sim-tag">Chapter 02 · The Risk Pool</span>
-    <h2 class="sim-h2">You're not paying alone.</h2>
-    <p class="sim-sub">Every orb is a driver. The gold one is you. The red ones will file claims this year.</p>
-    <div class="crowd-layout">
-      <canvas id="crowd-canvas" width="500" height="320"></canvas>
-      <div class="crowd-math-box">
-        <div class="math-line"><span class="math-num">50</span> accidents × <span class="math-num">$8,500</span></div>
-        <div class="math-op">÷</div>
-        <div class="math-line"><span class="math-num">1,000</span> drivers in pool</div>
-        <div class="math-op">=</div>
-        <div class="math-result">$425/yr base</div>
-        <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(253,241,225,0.1);font-size:13px;color:rgba(253,241,225,0.5);line-height:1.6;">
-          Then your personal risk score adjusts the base. A 19-year-old in a sports car with a DUI? The algorithm multiplies that risk exponentially.
-        </div>
-        <div style="margin-top:16px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:rgba(253,241,225,0.7);">
-          🟡 The gold orb is you. You're statistically surrounded by your risk cohort.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3. Myth Busters -->
-  <section class="sim-section">
-    <span class="sim-tag">Chapter 03 · Myth Busters</span>
-    <h2 class="sim-h2">What do you think?</h2>
-    <p class="sim-sub">84% of people get at least one wrong. These aren't trivial — they affect real premiums.</p>
-    <div class="guess-grid" id="guess-grid"></div>
-  </section>
-
-  <!-- 4. Beat the System -->
-  <section class="sim-section">
-    <span class="sim-tag">Chapter 04 · Beat the System</span>
-    <h2 class="sim-h2">Get below $80/month.</h2>
-    <p class="sim-sub">These are real, legal moves that lower your premium. Apply them and watch the number drop.</p>
-    <div class="game-two-col">
-      <div class="sim-card-cream">
-        <div class="price-lbl">Your current premium</div>
-        <div class="game-price-display">$<span id="g-price">127</span><span class="game-price-mo">/mo</span></div>
-        <div class="game-target">Target: get below <strong>$80/mo</strong></div>
-        <div class="target-bar"><div class="target-fill" id="g-bar" style="width:0%"></div></div>
-        <div class="saved-txt" id="saved-txt">Saved $0/mo so far</div>
-        <div class="won-box" id="won-box">
-          <div style="font-size:2.5rem;margin-bottom:8px;">🏆</div>
-          <div style="font-family:'Ogg Medium',serif;font-size:1.6rem;color:#111411;margin-bottom:6px;">System Beaten.</div>
-          <div style="font-size:14px;color:rgba(17,20,17,0.6);">You're under $80/month.</div>
-        </div>
-      </div>
-      <div id="moves-list"></div>
-    </div>
-  </section>
-
-  <!-- 5. Cliffhanger -->
-  <section class="sim-section">
-    <span class="sim-tag">Chapter 05 · What's Next</span>
-    <h2 class="sim-h2">Now you know how they set your price.</h2>
-    <p class="sim-sub" style="margin-bottom:40px;">But InsurCorp makes most of its money from <strong style="color:#fdf1e1;">investing your premiums</strong> — not from you at all. That's Experience #02.</p>
-    <div class="cliff-grid">
-      <div class="viral-box">
-        <div class="viral-kicker">🎯 Challenge a friend</div>
-        <div class="viral-price">$<span id="v-price">127</span><span style="font-size:1.4rem;font-weight:400;color:rgba(17,20,17,0.5);">/mo</span></div>
-        <div class="viral-q">Can they get below $80?</div>
-        <div class="v-btn-row">
-          <button class="v-btn v-btn-primary" onclick="shareX()">𝕏 Share on X</button>
-          <button class="v-btn v-btn-ghost" onclick="copyLink()">🔗 Copy link</button>
-        </div>
-        <div class="copy-msg" id="copy-msg"></div>
-        <div style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(17,20,17,0.1);">
-          <div style="font-size:13px;color:rgba(17,20,17,0.55);margin-bottom:12px;">Get notified when Experience #02 drops</div>
-          <div class="email-box" style="gap:8px;flex-wrap:wrap;">
-            <input class="email-inp" id="email-inp" type="email" placeholder="your@email.com" style="background:rgba(17,20,17,0.06);border:1px solid rgba(17,20,17,0.2);color:#111411;"/>
-            <button class="email-submit" style="background:#111411;color:#fdf1e1;" onclick="doSubscribe()">Notify Me</button>
+<!-- ── CH1: Profile Builder ── -->
+<div class="chapter" id="simulator" style="height: 100vh;">
+  <div class="chapter-stage">
+    <span class="ch-label">Chapter 01 · Floor 27 · Risk Department</span>
+    <div class="ch-profile">
+      <div class="ch-profile-left">
+        <h2 style="font-family:'Ogg Medium',serif;font-size:clamp(2.4rem,3.5vw,3.2rem);font-weight:500;line-height:0.95;color:#fdf1e1;margin:0 0 10px;">Build your<br/>risk profile.</h2>
+        <p style="font-size:1rem;color:rgba(253,241,225,0.45);line-height:1.6;max-width:380px;margin:0 0 40px;">Every choice updates your premium in real time. This is exactly how the algorithm sees you.</p>
+        <div class="factor-group">
+          <span class="fg-label">Your Age</span>
+          <div class="fg-btns">
+            <button class="fg-btn on" data-g="age" data-v="19">19</button>
+            <button class="fg-btn" data-g="age" data-v="25">25</button>
+            <button class="fg-btn" data-g="age" data-v="35">35</button>
+            <button class="fg-btn" data-g="age" data-v="45">45</button>
           </div>
-          <div class="copy-msg" id="sub-msg"></div>
+        </div>
+        <div class="factor-group">
+          <span class="fg-label">Car Type</span>
+          <div class="fg-btns">
+            <button class="fg-btn on" data-g="car" data-v="economy">Economy</button>
+            <button class="fg-btn" data-g="car" data-v="sports">Sports</button>
+            <button class="fg-btn" data-g="car" data-v="suv">SUV</button>
+            <button class="fg-btn" data-g="car" data-v="luxury">Luxury</button>
+          </div>
+        </div>
+        <div class="factor-group">
+          <span class="fg-label">Driving Record</span>
+          <div class="fg-btns">
+            <button class="fg-btn on" data-g="rec" data-v="clean">Clean</button>
+            <button class="fg-btn" data-g="rec" data-v="ticket">Ticket</button>
+            <button class="fg-btn" data-g="rec" data-v="accident">Accident</button>
+            <button class="fg-btn" data-g="rec" data-v="dui">DUI</button>
+          </div>
         </div>
       </div>
-      <div class="next-teaser">
-        <div class="next-label">Coming Next →</div>
-        <div class="next-title">How does InsurCorp actually make money?</div>
-        <div class="next-sub" style="margin-top:10px;">Hint: it's not from your premiums. It's from the float — investing billions of dollars between when you pay and when they pay out. Experience #02 puts you in the investment chair.</div>
-        <div style="margin-top:28px;display:flex;gap:8px;flex-wrap:wrap;">
-          <span style="display:inline-flex;align-items:center;min-height:36px;padding:0 16px;background:rgba(253,241,225,0.08);border-radius:999px;font-size:12px;color:rgba(253,241,225,0.55);">Underwriting</span>
-          <span style="display:inline-flex;align-items:center;min-height:36px;padding:0 16px;background:rgba(253,241,225,0.08);border-radius:999px;font-size:12px;color:rgba(253,241,225,0.55);">Float Strategy</span>
-          <span style="display:inline-flex;align-items:center;min-height:36px;padding:0 16px;background:rgba(253,241,225,0.08);border-radius:999px;font-size:12px;color:rgba(253,241,225,0.55);">Combined Ratio</span>
+      <div class="ch-profile-right">
+        <div class="price-display-wrap">
+          <div class="price-eyebrow">Monthly Premium</div>
+          <div class="price-hero" id="price-hero">$<span id="ph-num">127</span></div>
+          <span class="price-period">per month</span>
+          <div class="risk-gauge" style="margin:32px auto 0;">
+            <div class="rg-track"><div class="rg-fill" id="rg-fill" style="width:55%"></div></div>
+            <div class="rg-label">Risk score: <strong id="rg-num">62</strong> / 100</div>
+          </div>
+          <div style="margin-top:24px;font-size:13px;color:rgba(17,20,17,0.45);text-align:left;width:180px;">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(17,20,17,0.08);"><span>Age</span><strong id="d-age">+$92</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(17,20,17,0.08);"><span>Car</span><strong id="d-car">+$0</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;"><span>Record</span><strong id="d-rec">+$0</strong></div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(17,20,17,0.3);text-align:center;">Scroll to see the pool ↓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CH2: Risk Pool ── -->
+<div class="chapter" style="height: 100vh;">
+  <div class="chapter-stage">
+    <span class="ch-label">Chapter 02 · The Risk Pool</span>
+    <div class="ch-pool">
+      <canvas id="pool-canvas"></canvas>
+      <div class="pool-overlay">
+        <div class="pool-text-center">
+          <div class="pool-math">
+            50 accidents × $8,500<br/>
+            <span class="eq">÷ 1,000 drivers</span><br/>
+            = $425/yr base cost
+          </div>
+          <p class="pool-sub">Your gold orb is you. Red orbs will file claims this year.<br/>The algorithm calculates your statistical proximity to them.</p>
+          <div class="you-tag"><div class="you-dot" style="background:#fdf1e1;"></div> That's you — surrounded by your risk cohort</div>
         </div>
       </div>
     </div>
-  </section>
-
+  </div>
 </div>
+
+<!-- ── CH3: Myth Busters ── -->
+<div class="chapter" style="height: 100vh;">
+  <div class="chapter-stage">
+    <div class="myth-progress" id="myth-progress"></div>
+    <div class="ch-myths">
+      <div id="myth-slides"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CH4: Beat the System ── -->
+<div class="chapter" style="height: 100vh;">
+  <div class="chapter-stage">
+    <span class="ch-label">Chapter 04 · Beat the System</span>
+    <div class="ch-game">
+      <div class="game-left">
+        <div class="game-eyebrow">Your monthly premium</div>
+        <div class="game-price-big">$<span id="gp-num">127</span><span class="game-price-mo">/mo</span></div>
+        <div class="game-target-label">Target: get below <strong>$80/month</strong></div>
+        <div class="game-bar-wrap">
+          <div class="game-bar-track"><div class="game-bar-fill" id="gp-bar" style="width:0%"></div></div>
+          <div class="game-saved" id="gp-saved">$0 saved so far</div>
+        </div>
+        <div class="game-won-msg" id="gp-won">🏆 System beaten. You're under $80.</div>
+      </div>
+      <div class="game-right">
+        <div class="game-moves-title">Legal moves you can make</div>
+        <div id="gp-moves"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CH5: End ── -->
+<div class="chapter" style="height: 100vh;">
+  <div class="chapter-stage">
+    <div class="ch-end">
+      <div class="end-badge">✓ Experience #01 Complete</div>
+      <h2 class="end-title">Now you know how they<br/>set your price.</h2>
+      <p class="end-sub">But InsurCorp makes most of its money from <strong style="color:#fdf1e1;">investing your premiums</strong> — not from claims at all. That's Experience #02.</p>
+      <div class="end-actions">
+        <button class="end-btn-primary" onclick="doShareX()">𝕏 Share your price</button>
+        <button class="end-btn-ghost" onclick="doCopyLink()">🔗 Copy link</button>
+      </div>
+      <div class="end-copy-status" id="end-copy"></div>
+      <p style="font-size:13px;color:rgba(253,241,225,0.35);margin-bottom:12px;">Get notified when Experience #02 drops</p>
+      <div class="end-email-row">
+        <input class="end-email-inp" id="end-email" type="email" placeholder="your@email.com"/>
+        <button class="end-email-sub" onclick="doSubscribe()">Notify Me</button>
+      </div>
+      <div class="end-status" id="end-status"></div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script defer>
@@ -824,7 +1220,6 @@ button { border: 0; font: inherit; }
   let sightCards, originalSightCount = originalCards.length;
   let activeSight = originalSightCount;
 
-  /* ── Helpers ── */
   const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
   const smoothstep = (e0, e1, v) => { const x = clamp((v - e0) / (e1 - e0)); return x * x * (3 - 2 * x); };
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -834,17 +1229,14 @@ button { border: 0; font: inherit; }
   };
   const getScrollDistance = () => clamp(-section.getBoundingClientRect().top, 0, section.offsetHeight - window.innerHeight);
 
-  /* ── Per-frame update ── */
   function update() {
     rafPending = false;
     targetScroll = getScrollDistance();
     if (!initialized || reduceMotion.matches) { smoothScroll = targetScroll; initialized = true; }
     else { smoothScroll = lerp(smoothScroll, targetScroll, 0.14); }
     if (Math.abs(smoothScroll - targetScroll) < 0.08) smoothScroll = targetScroll;
-
     mouseX = lerp(mouseX, targetMouseX, 0.12);
     mouseY = lerp(mouseY, targetMouseY, 0.12);
-
     const frame2 = segmentInOut(smoothScroll, 560, 900, 1300, 1620);
     const frame3 = segmentInOut(smoothScroll, 1760, 2140, 2540, 2700);
     const progress = clamp(smoothScroll / 2700);
@@ -862,7 +1254,6 @@ button { border: 0; font: inherit; }
     const sharedHeroScale = progress * 0.23;
     const sightsScreenTop = Math.min(220, Math.max(112, window.innerHeight * 0.19)) - 50;
     const sightsParentTop = window.innerHeight - (window.innerHeight - sightsScreenTop) / backScale;
-
     css.setProperty('--mx', reduceMotion.matches ? '0' : mouseX.toFixed(4));
     css.setProperty('--my', reduceMotion.matches ? '0' : mouseY.toFixed(4));
     css.setProperty('--back-opacity', (1 - frame2.active * 0.06).toString());
@@ -915,19 +1306,13 @@ button { border: 0; font: inherit; }
     css.setProperty('--sights-scale', (1 / backScale).toString());
     css.setProperty('--sights-top', `${sightsParentTop}px`);
     css.setProperty('--sights-screen-top', `${sightsScreenTop}px`);
-
     if (Math.abs(smoothScroll - targetScroll) > 0.08 ||
         Math.abs(mouseX - targetMouseX) > 0.001 ||
-        Math.abs(mouseY - targetMouseY) > 0.001) {
-      requestTick();
-    }
+        Math.abs(mouseY - targetMouseY) > 0.001) requestTick();
   }
-
   function requestTick() {
     if (!rafPending) { rafPending = true; requestAnimationFrame(update); }
   }
-
-  /* ── Slider ── */
   function setupSightSlider() {
     track.replaceChildren();
     for (let s = 0; s < 3; s++) {
@@ -946,7 +1331,6 @@ button { border: 0; font: inherit; }
     track.addEventListener('transitionend', normalizeSightSlider);
     updateSightSlider();
   }
-
   function updateSightSlider() {
     if (!sightCards || !sightCards[0]) return;
     const cardWidth = sightCards[0].offsetWidth;
@@ -954,7 +1338,6 @@ button { border: 0; font: inherit; }
     css.setProperty('--sights-shift', `${-(cardWidth + gap) * activeSight}px`);
     sightCards.forEach(card => card.classList.toggle('is-active', Number(card.dataset.sightIndex) === activeSight));
   }
-
   function moveSightSlider(dir) { activeSight += dir; updateSightSlider(); }
   function selectSightCard(card) { const i = Number(card.dataset.sightIndex); if (isFinite(i)) { activeSight = i; updateSightSlider(); } }
   function jumpSightSlider(i) {
@@ -965,8 +1348,6 @@ button { border: 0; font: inherit; }
     if (activeSight >= originalSightCount * 2) jumpSightSlider(activeSight - originalSightCount);
     else if (activeSight < originalSightCount) jumpSightSlider(activeSight + originalSightCount);
   }
-
-  /* ── Listeners ── */
   window.addEventListener('scroll', requestTick, { passive: true });
   window.addEventListener('resize', () => { updateSightSlider(); requestTick(); });
   window.addEventListener('pointermove', e => {
@@ -976,13 +1357,14 @@ button { border: 0; font: inherit; }
   }, { passive: true });
   prevBtn.addEventListener('click', () => moveSightSlider(-1));
   nextBtn.addEventListener('click', () => moveSightSlider(1));
-
   window.addEventListener('load', () => { setupSightSlider(); requestTick(); });
 })();
 
 /* ══════════════════════════════════════
    SIMULATOR LOGIC
    ══════════════════════════════════════ */
+
+/* ── State ── */
 const ST = { age: 19, car: 'economy', rec: 'clean' };
 const PRICE = { age:{19:92,25:45,35:0,45:-12}, car:{economy:0,sports:55,suv:28,luxury:75}, rec:{clean:0,ticket:35,accident:98,dui:185} };
 const RISK  = { age:{19:45,25:22,35:5,45:2}, car:{economy:5,sports:25,suv:15,luxury:20}, rec:{clean:0,ticket:18,accident:35,dui:55} };
@@ -990,9 +1372,10 @@ const BASE  = 127;
 const calcP = () => BASE + PRICE.age[ST.age] + PRICE.car[ST.car] + PRICE.rec[ST.rec];
 const calcR = () => Math.min(RISK.age[ST.age] + RISK.car[ST.car] + RISK.rec[ST.rec] + 10, 100);
 
-document.querySelectorAll('.sel-btn').forEach(btn => {
+/* ── Profile Builder ── */
+document.querySelectorAll('.fg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll(`.sel-btn[data-g="${btn.dataset.g}"]`).forEach(b => b.classList.remove('on'));
+    document.querySelectorAll(`.fg-btn[data-g="${btn.dataset.g}"]`).forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
     const v = btn.dataset.v; ST[btn.dataset.g] = isNaN(v) ? v : +v;
     updateProfile();
@@ -1001,152 +1384,198 @@ document.querySelectorAll('.sel-btn').forEach(btn => {
 
 function updateProfile() {
   const p = calcP(), r = calcR();
-  animNum(document.getElementById('p-price'), p);
-  document.getElementById('risk-fill').style.width = r + '%';
-  animNum(document.getElementById('risk-num'), r);
+  const hero = document.getElementById('price-hero');
+  hero.classList.remove('bump');
+  void hero.offsetWidth;
+  hero.classList.add('bump');
+  setTimeout(() => hero.classList.remove('bump'), 350);
+  animNum(document.getElementById('ph-num'), p);
+  document.getElementById('rg-fill').style.width = r + '%';
+  animNum(document.getElementById('rg-num'), r);
   const af = PRICE.age[ST.age], cf = PRICE.car[ST.car], rf = PRICE.rec[ST.rec];
-  document.getElementById('age-val').textContent = (af >= 0 ? '+$' : '-$') + Math.abs(af);
-  document.getElementById('car-val').textContent = (cf === 0 ? '+$0' : '+$' + cf);
-  document.getElementById('rec-val').textContent = (rf === 0 ? '+$0' : '+$' + rf);
-  document.getElementById('v-price').textContent = p;
+  document.getElementById('d-age').textContent = (af >= 0 ? '+$' : '-$') + Math.abs(af);
+  document.getElementById('d-car').textContent = '+$' + cf;
+  document.getElementById('d-rec').textContent = '+$' + rf;
+  // Sync game price
   gamePrice = p;
-  if (document.getElementById('g-price')) document.getElementById('g-price').textContent = p;
+  if (document.getElementById('gp-num')) animNum(document.getElementById('gp-num'), p);
 }
 
-/* ── Crowd canvas ── */
+/* ── Pool Canvas ── */
 (function () {
-  const c = document.getElementById('crowd-canvas');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const COUNT = 100;
+  const canvas = document.getElementById('pool-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const COUNT = 150;
   const orbs = Array.from({ length: COUNT }, (_, i) => ({
-    x: 30 + Math.random() * (c.width - 60), y: 30 + Math.random() * (c.height - 60),
-    vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
-    isUser: i === 50, isClaim: Math.random() < .05,
-    r: i === 50 ? 8 : 3 + Math.random() * 2.5, phase: Math.random() * Math.PI * 2,
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random() - .5) * .0006, vy: (Math.random() - .5) * .0006,
+    isUser: i === 75, isClaim: Math.random() < .05,
+    r: i === 75 ? 0.018 : 0.005 + Math.random() * 0.006,
+    phase: Math.random() * Math.PI * 2,
   }));
   let t = 0;
-  function loop() {
-    requestAnimationFrame(loop); ctx.clearRect(0, 0, c.width, c.height);
-    ctx.fillStyle = 'rgba(11,17,16,0.97)'; ctx.fillRect(0, 0, c.width, c.height);
-    t += .016;
+  function draw() {
+    requestAnimationFrame(draw);
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0b1110'; ctx.fillRect(0, 0, W, H);
+    t += .012;
     orbs.forEach(o => {
       o.x += o.vx; o.y += o.vy;
-      if (o.x < 8 || o.x > c.width - 8) o.vx *= -1;
-      if (o.y < 8 || o.y > c.height - 8) o.vy *= -1;
-      const pulse = o.isUser ? 1 + .18 * Math.sin(t * 3 + o.phase) : 1;
-      ctx.beginPath(); ctx.arc(o.x, o.y, o.r * pulse, 0, Math.PI * 2);
+      if (o.x < 0.02 || o.x > 0.98) o.vx *= -1;
+      if (o.y < 0.02 || o.y > 0.98) o.vy *= -1;
+      const px = o.x * W, py = o.y * H;
+      const pr = o.r * Math.min(W, H);
+      const pulse = o.isUser ? 1 + .2 * Math.sin(t * 2.5 + o.phase) : 1;
+      ctx.beginPath(); ctx.arc(px, py, pr * pulse, 0, Math.PI * 2);
       if (o.isUser) {
-        const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, 16);
-        g.addColorStop(0, 'rgba(253,241,225,1)'); g.addColorStop(1, 'rgba(253,241,225,0)');
+        const g = ctx.createRadialGradient(px, py, 0, px, py, pr * 3);
+        g.addColorStop(0, 'rgba(253,241,225,0.9)'); g.addColorStop(1, 'rgba(253,241,225,0)');
         ctx.fillStyle = g; ctx.fill();
-        ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#fdf1e1'; ctx.shadowBlur = 18; ctx.shadowColor = '#fdf1e1'; ctx.fill(); ctx.shadowBlur = 0;
-      } else if (o.isClaim) { ctx.fillStyle = 'rgba(239,68,68,.9)'; ctx.fill(); }
-      else { ctx.fillStyle = 'rgba(60,100,140,.7)'; ctx.fill(); }
+        ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fillStyle = '#fdf1e1'; ctx.shadowBlur = 20; ctx.shadowColor = '#fdf1e1'; ctx.fill(); ctx.shadowBlur = 0;
+      } else if (o.isClaim) {
+        ctx.fillStyle = `rgba(239,68,68,${0.6 + 0.3 * Math.sin(t * 3 + o.phase)})`; ctx.fill();
+      } else {
+        ctx.fillStyle = 'rgba(100,140,180,0.55)'; ctx.fill();
+      }
     });
   }
-  loop();
+  draw();
 })();
 
-/* ── Guess mechanic ── */
-const QUESTIONS = [
-  { q: 'Does your car\'s <strong>color</strong> affect your premium?', icon: '🎨', correct: false, twist: 'WHERE you park matters. A high-theft ZIP = +23%. Color? Irrelevant.' },
-  { q: 'Safer cars = <strong>cheaper</strong> insurance?', icon: '🛡', correct: false, twist: 'Volvo is very safe but expensive to repair. Repair cost > safety rating.' },
-  { q: 'Does your <strong>credit score</strong> affect your premium?', icon: '💳', correct: true, twist: 'Only CA, HI & MA ban this. Poor credit = 76% higher rate in 46 states.' },
-  { q: 'Moving 2 miles can change your rate by <strong>$4,000/yr</strong>?', icon: '📍', correct: true, twist: 'Same driver, same car. Different ZIP = $4,000 more in Detroit.' },
+/* ── Myth Slides ── */
+const MYTHS = [
+  { n: '01 / 04', q: 'Does your car\'s color affect your premium?', a: ['Yes', 'No'], correct: 1, reveal: '<strong>Myth.</strong> Color is irrelevant. But where you park at night? High-theft ZIP codes can add 23% instantly.' },
+  { n: '02 / 04', q: 'Do safer cars mean cheaper insurance?', a: ['Yes', 'No'], correct: 1, reveal: '<strong>Myth.</strong> A Volvo is very safe — but very expensive to repair. Repair cost beats safety rating every time.' },
+  { n: '03 / 04', q: 'Does your credit score affect your car insurance?', a: ['Yes', 'No'], correct: 0, reveal: '<strong>True.</strong> In 46 US states, poor credit raises your car insurance by up to 76%. Only CA, HI & MA ban this.' },
+  { n: '04 / 04', q: 'Moving 2 miles can change your rate by $4,000/yr?', a: ['Yes', 'No'], correct: 0, reveal: '<strong>True.</strong> Same driver. Same car. Different ZIP code. That\'s $4,000 more per year in Detroit.' },
 ];
-(function () {
-  const g = document.getElementById('guess-grid');
-  if (!g) return;
-  g.innerHTML = QUESTIONS.map((q, i) => `
-    <div class="gcard" id="gc${i}">
-      <div class="gc-icon">${q.icon}</div>
-      <p class="gc-q">${q.q}</p>
-      <div class="gc-btns">
-        <button class="gc-btn" onclick="answerQ(${i},true)">👍 Yes</button>
-        <button class="gc-btn" onclick="answerQ(${i},false)">👎 No</button>
+let mythIndex = 0;
+(function buildMyths() {
+  const container = document.getElementById('myth-slides');
+  const progress  = document.getElementById('myth-progress');
+  if (!container || !progress) return;
+  container.style.width = 'min(700px, 100%)';
+  MYTHS.forEach((m, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'myth-slide' + (i === 0 ? ' active' : '');
+    slide.id = 'myth-' + i;
+    slide.innerHTML = `
+      <div class="myth-num">${m.n}</div>
+      <div class="myth-q">${m.q}</div>
+      <div class="myth-choices">
+        ${m.a.map((label, ai) => `<button class="myth-btn" onclick="answerMyth(${i},${ai})">${label}</button>`).join('')}
       </div>
-      <div class="gc-reveal" id="gr${i}"></div>
-    </div>
-  `).join('');
+      <div class="myth-reveal" id="mr-${i}">${m.reveal}</div>
+      <button class="myth-next" id="mn-${i}" onclick="nextMyth()">Next <span aria-hidden="true">→</span></button>
+    `;
+    container.appendChild(slide);
+    const dot = document.createElement('div');
+    dot.className = 'mp-dot' + (i === 0 ? ' on' : '');
+    dot.id = 'mp-' + i;
+    progress.appendChild(dot);
+  });
 })();
-window.answerQ = function (i, yes) {
-  const q = QUESTIONS[i], card = document.getElementById('gc' + i);
-  if (!card || card.classList.contains('answered')) return;
-  card.classList.add('answered');
-  const btns = card.querySelectorAll('.gc-btn');
+
+window.answerMyth = function (slideIdx, choiceIdx) {
+  const slide = document.getElementById('myth-' + slideIdx);
+  if (!slide || slide.querySelector('.myth-btn.correct')) return;
+  const m = MYTHS[slideIdx];
+  const btns = slide.querySelectorAll('.myth-btn');
   btns.forEach(b => b.disabled = true);
-  btns[q.correct ? 0 : 1].classList.add('correct-ans');
-  if (yes !== q.correct) btns[yes ? 0 : 1].classList.add('wrong-ans');
-  const rev = document.getElementById('gr' + i);
-  rev.innerHTML = `<div class="${q.correct ? 'verdict-t' : 'verdict-f'}">${q.correct ? '✅ TRUE' : '❌ MYTH'}</div><div style="margin-top:6px;color:#555;">${q.twist}</div>`;
-  rev.classList.add('show');
+  btns[m.correct].classList.add('correct');
+  if (choiceIdx !== m.correct) btns[choiceIdx].classList.add('wrong');
+  document.getElementById('mr-' + slideIdx).classList.add('show');
+  const nextBtn = document.getElementById('mn-' + slideIdx);
+  if (nextBtn && slideIdx < MYTHS.length - 1) nextBtn.classList.add('show');
+};
+
+window.nextMyth = function () {
+  const cur = document.getElementById('myth-' + mythIndex);
+  if (cur) cur.classList.remove('active');
+  document.getElementById('mp-' + mythIndex).classList.remove('on');
+  document.getElementById('mp-' + mythIndex).classList.add('done');
+  mythIndex++;
+  if (mythIndex < MYTHS.length) {
+    document.getElementById('myth-' + mythIndex).classList.add('active');
+    document.getElementById('mp-' + mythIndex).classList.add('on');
+  }
 };
 
 /* ── Game ── */
 const MOVES = [
-  { id: 'telematics', label: '📱 Install telematics app', save: 18 },
-  { id: 'deductible', label: '💸 Raise deductible to $2,000', save: 22 },
-  { id: 'course', label: '📚 Defensive driving course', save: 9 },
-  { id: 'bundle', label: '🏠 Bundle with renter\'s insurance', save: 14 },
-  { id: 'credit', label: '📈 Improve credit score 100 pts', save: 31 },
+  { id: 'telematics', name: '📱 Install telematics app', detail: 'Prove you\'re a safe driver. Gets cheaper over time.', save: 18 },
+  { id: 'deductible', name: '💸 Raise deductible to $2,000', detail: 'You pay more in a crash — but monthly cost drops.', save: 22 },
+  { id: 'course',     name: '📚 Defensive driving course', detail: 'One weekend. Valid for 3 years in most states.', save: 9 },
+  { id: 'bundle',     name: '🏠 Bundle with renter\'s insurance', detail: 'Same insurer, multi-policy discount. Instant.', save: 14 },
+  { id: 'credit',     name: '📈 Improve credit score 100 pts', detail: 'Takes 6–12 months but saves the most long-term.', save: 31 },
 ];
 let gamePrice = calcP(), gameSaved = 0;
 const appliedMoves = new Set();
+
 (function buildGame() {
-  const list = document.getElementById('moves-list'); if (!list) return;
+  const list = document.getElementById('gp-moves'); if (!list) return;
   list.innerHTML = MOVES.map(m => `
-    <div class="move-item">
-      <div><div class="move-label">${m.label}</div><div class="move-save">-$${m.save}/mo</div></div>
-      <button class="move-apply" id="mb-${m.id}" onclick="applyMove('${m.id}',${m.save})">Apply</button>
+    <div class="gmove" id="gm-${m.id}">
+      <div class="gmove-info">
+        <div class="gmove-name">${m.name}</div>
+        <div class="gmove-save">-$${m.save}/mo</div>
+      </div>
+      <button class="gmove-apply" id="ga-${m.id}" onclick="applyGameMove('${m.id}',${m.save})">Apply</button>
     </div>
   `).join('');
 })();
-window.applyMove = function (id, save) {
+
+window.applyGameMove = function (id, save) {
   if (appliedMoves.has(id)) return;
   appliedMoves.add(id);
-  gamePrice = Math.max(gamePrice - save, 20); gameSaved += save;
-  animNum(document.getElementById('g-price'), gamePrice);
-  document.getElementById('v-price').textContent = gamePrice;
-  const prog = Math.min((gameSaved / (calcP() - 80)) * 100, 100);
-  document.getElementById('g-bar').style.width = prog + '%';
-  document.getElementById('saved-txt').textContent = 'Saved $' + gameSaved + '/mo so far';
-  document.getElementById('mb-' + id).textContent = '✓ Applied';
-  document.getElementById('mb-' + id).classList.add('done');
-  document.getElementById('mb-' + id).disabled = true;
-  if (gamePrice <= 80) setTimeout(() => document.getElementById('won-box').classList.add('show'), 400);
+  gamePrice = Math.max(gamePrice - save, 20);
+  gameSaved += save;
+  animNum(document.getElementById('gp-num'), gamePrice);
+  const base = calcP();
+  const prog = Math.min((gameSaved / (base - 80)) * 100, 100);
+  document.getElementById('gp-bar').style.width = prog + '%';
+  document.getElementById('gp-saved').textContent = '$' + gameSaved + ' saved so far';
+  const btn = document.getElementById('ga-' + id);
+  if (btn) { btn.textContent = '✓ Done'; btn.classList.add('done'); btn.disabled = true; }
+  document.getElementById('gm-' + id).classList.add('done');
+  if (gamePrice <= 80) setTimeout(() => document.getElementById('gp-won').classList.add('show'), 400);
 };
 
 /* ── Share / subscribe ── */
-window.shareX = function () {
+window.doShareX = function () {
   const p = calcP();
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('My car insurance: $' + p + '/mo. Can you get below $80?\nhttps://inside-things.vercel.app')}`, '_blank');
 };
-window.copyLink = function () {
+window.doCopyLink = function () {
   const p = calcP();
-  navigator.clipboard.writeText('My car insurance: $' + p + '/mo. Can you get below $80?\nhttps://inside-things.vercel.app').then(() => {
-    const m = document.getElementById('copy-msg'); m.textContent = '✓ Copied!'; setTimeout(() => m.textContent = '', 3000);
+  navigator.clipboard.writeText('My car insurance: $' + p + '/mo.\nhttps://inside-things.vercel.app').then(() => {
+    const el = document.getElementById('end-copy'); el.textContent = '✓ Copied to clipboard'; setTimeout(() => el.textContent = '', 3000);
   });
 };
 window.doSubscribe = async function () {
-  const email = document.getElementById('email-inp').value;
+  const email = document.getElementById('end-email').value;
   if (!email.includes('@')) return;
-  const msg = document.getElementById('sub-msg'); msg.textContent = '...';
+  const st = document.getElementById('end-status'); st.textContent = '...';
   try {
     await fetch('https://dagdyyspelsdokfrwzct.supabase.co/rest/v1/subscribers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhZ2R5eXNwZWxzZG9rZnJ3emN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjIwOTYsImV4cCI6MjEwMTYzODA5Nn0.wRD7crpV1c-LTr9Unbgw0lhYZPAfMMKYTPEiuxPMMmI', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhZ2R5eXNwZWxzZG9rZnJ3emN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjIwOTYsImV4cCI6MjEwMTYzODA5Nn0.wRD7crpV1c-LTr9Unbgw0lhYZPAfMMKYTPEiuxPMMmI' },
       body: JSON.stringify({ email, source: 'inside-insurance' }),
     });
-    msg.textContent = '✓ You\'re on the list!';
-  } catch { msg.textContent = '✓ You\'re on the list!'; }
+    st.textContent = "✓ You're on the list.";
+  } catch { st.textContent = "✓ You're on the list."; }
 };
 
 /* ── Number animation ── */
 function animNum(el, target) {
   if (!el) return;
-  const start = parseInt(el.textContent) || 0, diff = target - start, dur = 600, t0 = performance.now();
+  const start = parseInt(el.textContent) || 0, diff = target - start, dur = 500, t0 = performance.now();
   (function step(now) {
     const p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
     el.textContent = Math.round(start + diff * e); if (p < 1) requestAnimationFrame(step);
