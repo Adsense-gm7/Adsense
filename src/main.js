@@ -1,86 +1,70 @@
 /* ============================================================
-   src/main.js — Entry point
-   Single RAF loop: Lenis + Three.js composer
+   src/main.js — Entry point with quality-adaptive pipeline
    ============================================================ */
 import { initScene, renderer, camera, scene, clock } from './world/scene.js';
-import { initPostProcessing, detectQuality, composer } from './world/postprocessing.js';
+import { initPostProcessing, detectQuality, composer, useComposer } from './world/postprocessing.js';
 import { buildCity }      from './world/city.js';
 import { buildInsurCorp } from './world/building.js';
 import { buildStars, buildDust, buildCrowdOrbs, animateParticles } from './world/particles.js';
-import { initLenis, lenisRaf }  from './scroll/lenis.js';
-import { initScrollTimeline }   from './scroll/timeline.js';
-import { initHUD }       from './ui/hud.js';
+import { initLenis, lenisRaf }     from './scroll/lenis.js';
+import { initScrollTimeline }      from './scroll/timeline.js';
+import { initHUD }          from './ui/hud.js';
 import { unlockAchievement } from './ui/achievements.js';
 import { trackEvent, trackSceneEnter, SESSION_ID } from './analytics/tracker.js';
 
-// ── Boot ──────────────────────────────────────────────────
 async function boot() {
-  const canvas = document.getElementById('canvas-3d');
-
-  // 1. Three.js scene
-  initScene(canvas);
-
-  // 2. Post-processing (quality-adaptive)
+  const canvas  = document.getElementById('canvas-3d');
   const quality = detectQuality();
+
+  // 3D world — quality-aware
+  initScene(canvas, quality);
   initPostProcessing(quality);
-
-  // 3. Build 3D world
-  buildStars();
-  buildDust();
-  buildCity();
+  buildStars(quality);
+  buildDust(quality);
+  buildCity(quality);
   buildInsurCorp();
-  buildCrowdOrbs();
+  buildCrowdOrbs(quality);
 
-  // 4. Smooth scroll (Lenis)
+  // Scroll
   const lenis = initLenis();
-
-  // 5. Camera scroll timeline
   initScrollTimeline(lenis);
 
-  // 6. HTML HUD overlays
+  // UI
   initHUD();
+  initCursorGlow();
+  animateLiveCounter();
 
-  // 7. Analytics
+  // Analytics
   trackEvent('page_view', 0, { session: SESSION_ID, quality });
   trackSceneEnter(0);
   setTimeout(() => unlockAchievement('started'), 1500);
 
-  // 8. Cursor glow
-  initCursorGlow();
-
-  // 9. Live counter
-  animateLiveCounter();
-
-  // 10. Single RAF render loop (Lenis + Three.js in sync)
+  // Unified RAF loop
   function render(time) {
     requestAnimationFrame(render);
-    lenisRaf(time);                   // advance Lenis smooth scroll
-    const delta = clock.getDelta();
-    animateParticles(delta);
-    composer.render();
+    lenisRaf(time);
+    animateParticles(clock.getDelta());
+    // Low quality: direct render (no post-processing)
+    if (useComposer && composer) composer.render();
+    else renderer.render(scene, camera);
   }
   requestAnimationFrame(render);
 }
 
-// ── Cursor glow ───────────────────────────────────────────
 function initCursorGlow() {
   const glow = document.getElementById('cursor-glow');
   if (!glow) return;
   window.addEventListener('mousemove', e => {
-    glow.style.transform = `translate(${e.clientX - 150}px, ${e.clientY - 150}px)`;
+    glow.style.transform = `translate(${e.clientX-150}px,${e.clientY-150}px)`;
   });
 }
 
-// ── Live counter ──────────────────────────────────────────
 function animateLiveCounter() {
   const el = document.getElementById('sp-live');
   if (!el) return;
-  let current = 1200 + Math.floor(Math.random() * 200);
-  el.textContent = current.toLocaleString();
-  setInterval(() => {
-    current = Math.max(current + (Math.floor(Math.random() * 7) - 2), 800);
-    el.textContent = current.toLocaleString();
-  }, 4000);
+  let n = 1200 + Math.floor(Math.random()*200);
+  el.textContent = n.toLocaleString();
+  setInterval(() => { n = Math.max(n + Math.floor(Math.random()*7)-2, 800); el.textContent = n.toLocaleString(); }, 4000);
 }
 
 boot();

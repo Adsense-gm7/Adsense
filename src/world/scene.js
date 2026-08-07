@@ -1,62 +1,49 @@
 /* ============================================================
-   src/world/scene.js
-   Three.js renderer, camera, lights, resize handling
+   src/world/scene.js — quality-aware renderer
    ============================================================ */
 import * as THREE from 'three';
 
 export let renderer, camera, scene, clock;
 
-export function initScene(canvas) {
+export function initScene(canvas, quality = 'high') {
   clock = new THREE.Clock();
 
-  // ── Renderer ──────────────────────────────────────────────
+  const mobile = quality === 'low';
+
   renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: !mobile,
     alpha: false,
-    powerPreference: 'high-performance',
+    powerPreference: mobile ? 'low-power' : 'high-performance',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(mobile ? 1 : Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMappingExposure = mobile ? 1.0 : 1.2;
+  renderer.shadowMap.enabled = !mobile;
 
-  // ── Scene ─────────────────────────────────────────────────
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x020408);
-  scene.fog = new THREE.FogExp2(0x0a1628, 0.008);
+  scene.fog = new THREE.FogExp2(0x0a1628, mobile ? 0.005 : 0.008);
 
-  // ── Camera ────────────────────────────────────────────────
   camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    2000
+    mobile ? 70 : 60,
+    window.innerWidth / window.innerHeight, 0.1, 2000
   );
   camera.position.set(0, 220, 320);
   camera.lookAt(0, 60, 0);
 
-  // ── Lights ────────────────────────────────────────────────
-  // Ambient
-  const ambient = new THREE.AmbientLight(0x0a1628, 0.4);
-  scene.add(ambient);
+  // Lights
+  scene.add(new THREE.AmbientLight(0x0a1628, mobile ? 0.8 : 0.4));
 
-  // Moon (cold directional)
   const moon = new THREE.DirectionalLight(0x4488cc, 0.8);
   moon.position.set(50, 100, 50);
-  moon.castShadow = true;
-  moon.shadow.mapSize.set(2048, 2048);
-  moon.shadow.camera.far = 500;
+  if (!mobile) { moon.castShadow = true; moon.shadow.mapSize.set(1024,1024); }
   scene.add(moon);
 
-  // Warm fill from below (city reflected light)
-  const fill = new THREE.HemisphereLight(0x0a1628, 0x1a0a2e, 0.3);
-  scene.add(fill);
+  if (!mobile) scene.add(new THREE.HemisphereLight(0x0a1628, 0x1a0a2e, 0.3));
 
-  // ── Resize ────────────────────────────────────────────────
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();

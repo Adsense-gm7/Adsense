@@ -518,15 +518,54 @@ body {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  /* HUD panels — bottom sheet on mobile */
   .hud-side-right, .hud-side-left {
-    right: 12px; left: 12px;
-    top: auto; bottom: 20px;
+    right: 0; left: 0;
+    top: auto !important;
+    bottom: 0 !important;
     transform: none !important;
-    width: auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0;
     max-height: 60vh;
     overflow-y: auto;
+    padding: 20px 16px;
   }
-  .hud-title { font-size: clamp(28px, 8vw, 48px); }
+  .hud-side-right.hud-visible, .hud-side-left.hud-visible {
+    transform: none !important;
+    opacity: 1;
+  }
+  .hud-center, .hud-center-wide {
+    width: 92% !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+  }
+  .hud-title { font-size: 32px; }
+  .quick-answer { padding: 14px 16px; }
+  .social-proof { padding: 10px 16px; border-radius: 14px; }
+  .sp-item { padding: 0 12px; }
+  .sp-num { font-size: 16px; }
+  /* Touch-friendly buttons */
+  .age-btn, .car-btn, .record-btn { padding: 10px 12px; font-size: 13px; }
+  .move-btn { padding: 10px 14px; }
+  .gc-btn { padding: 10px; }
+  /* Smaller price */
+  .price-value { font-size: 36px; }
+  .game-price-display { font-size: 40px; }
+  /* Guess grid: 1 col */
   .guess-grid { grid-template-columns: 1fr; }
-  .social-proof { flex-wrap: wrap; border-radius: 16px; }
+  .guess-card { height: 160px; }
+  /* Achievement toast */
+  .achievement-toast { left: 8px; right: 8px; min-width: unset; max-width: unset; }
+  /* Viral */
+  .viral-btns { flex-direction: column; }
+  /* Email */
+  .email-row { flex-direction: column; }
+  .email-btn { border-radius: 100px; }
+  /* Cliff */
+  .cliff-title { font-size: 26px; }
+  /* Floor label */
+  .floor-num { font-size: 70px; }
 }
