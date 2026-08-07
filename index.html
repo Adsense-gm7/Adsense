@@ -1,88 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Why Is My Car Insurance So Expensive? | Inside Things</title>
-  <meta name="description" content="Don't read about car insurance. Run the system yourself. A cinematic 3D simulation that shows exactly how your price is calculated." />
-  <meta property="og:title"       content="Why Is My Car Insurance So Expensive?" />
-  <meta property="og:description" content="Run the insurance system yourself. Interactive 3D simulation." />
-  <meta property="og:url"         content="https://inside-things.vercel.app" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/hud.css" />
+  <meta name="description" content="Don't read about car insurance. Run the system yourself. A cinematic 3D simulation."/>
+  <meta property="og:title"       content="Why Is My Car Insurance So Expensive?"/>
+  <meta property="og:description" content="Run the insurance system yourself. Interactive 3D simulation."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/hud.css"/>
 </head>
 <body>
 
-  <!-- ████ CURSOR GLOW ████ -->
+  <!-- Cursor glow -->
   <div id="cursor-glow"></div>
 
-  <!-- ████ THREE.JS CANVAS (full viewport) ████ -->
+  <!-- Three.js canvas -->
   <canvas id="canvas-3d"></canvas>
 
-  <!-- ████ SCROLL CONTAINER (drives camera via ScrollTrigger) ████ -->
-  <div id="scroll-container"></div>
+  <!-- Fade overlay for scene transitions -->
+  <div id="scene-overlay"></div>
 
-  <!-- ████ HUD OVERLAY LAYER ████ -->
+  <!-- HUD overlay layer -->
   <div id="hud-layer">
 
-    <!-- ── HERO HUD (always visible at start) ── -->
-    <div id="hud-hero" class="hud-panel hud-visible hud-center">
-      <div class="hud-tag">Inside Things · Flight Simulator for Complex Systems</div>
+    <!-- ── HERO (Scene 0) ── -->
+    <div id="hud-hero" class="hud-panel hud-center" style="display:flex">
+      <div class="hero-tag">Inside Things · Flight Simulator for Complex Systems</div>
       <h1 class="hud-title">
         Why is your car insurance<br/>
         <span class="accent">so expensive?</span>
       </h1>
-
-      <!-- Quick Answer -->
       <div class="quick-answer">
         <div class="qa-label">⚡ Quick Answer</div>
-        <p class="qa-text">
-          Insurance companies pool risk across <strong>thousands of drivers</strong>.
-          Your price is set by your <strong>age, car, driving record, credit score and ZIP code</strong>.
-          Young drivers in sports cars can pay <strong>3–5× more</strong> than a 45-year-old with a sedan.
-        </p>
+        <p class="qa-text">Insurance companies pool risk across <strong>thousands of drivers</strong>. Your price is determined by your <strong>age, car, record, credit score and ZIP</strong>. Young drivers can pay <strong>3–5× more</strong>.</p>
         <div class="qa-cta">Don't read about it. <em>Run the system yourself.</em></div>
       </div>
-
-      <!-- Social proof -->
       <div class="social-proof">
         <div class="sp-item"><div class="sp-num" id="sp-live">1,247</div><div class="sp-label">inside right now</div></div>
         <div class="sp-sep"></div>
-        <div class="sp-item"><div class="sp-num">84%</div><div class="sp-label">guessed wrong on Q1</div></div>
+        <div class="sp-item"><div class="sp-num">84%</div><div class="sp-label">guessed wrong</div></div>
         <div class="sp-sep"></div>
-        <div class="sp-item"><div class="sp-num">2 min</div><div class="sp-label">average to finish</div></div>
+        <div class="sp-item"><div class="sp-num">2 min</div><div class="sp-label">to finish</div></div>
       </div>
-
-      <div class="scroll-hint">
-        <div class="scroll-dot"></div>
-        <span>Scroll to enter InsurCorp</span>
-      </div>
+      <button class="begin-btn" onclick="nextScene()">
+        <span>Enter InsurCorp</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <div class="key-hint">or press Space / Scroll Down</div>
     </div>
 
-    <!-- ── FLOOR 27 LABEL (appears during elevator) ── -->
-    <div id="hud-floor" class="hud-panel hud-floor-label" style="display:none">
-      <div class="floor-num">27</div>
-      <div class="floor-label">RISK DEPARTMENT</div>
-    </div>
-
-    <!-- ── PROFILE BUILDER ── -->
+    <!-- ── PROFILE BUILDER (Scene 5) ── -->
     <div id="hud-profile" data-hud="hud-profile" class="hud-panel hud-side-right">
-      <div class="hud-chapter">Chapter 01</div>
+      <div class="hud-chapter">Chapter 01 · Floor 27</div>
       <h2 class="hud-section-title">You just bought your first car.</h2>
-      <p class="hud-section-sub">Every choice changes the price in real time.</p>
-
+      <p class="hud-section-sub">Build your profile. Every choice changes your price live.</p>
       <div class="profile-group">
         <div class="profile-label">Your Age</div>
         <div class="profile-row">
-          <button class="age-btn active" data-age="19">19 · New Driver</button>
-          <button class="age-btn" data-age="25">25 · Young Adult</button>
-          <button class="age-btn" data-age="35">35 · Experienced</button>
-          <button class="age-btn" data-age="45">45 · Veteran</button>
+          <button class="age-btn active" data-age="19">19</button>
+          <button class="age-btn" data-age="25">25</button>
+          <button class="age-btn" data-age="35">35</button>
+          <button class="age-btn" data-age="45">45</button>
         </div>
       </div>
-
       <div class="profile-group">
         <div class="profile-label">Your Car</div>
         <div class="profile-row">
@@ -92,19 +75,17 @@
           <button class="car-btn" data-car="luxury">✨ Luxury</button>
         </div>
       </div>
-
       <div class="profile-group">
         <div class="profile-label">Driving Record</div>
         <div class="profile-row">
           <button class="record-btn active" data-record="clean">✅ Clean</button>
-          <button class="record-btn" data-record="ticket">⚠️ Minor Ticket</button>
-          <button class="record-btn" data-record="accident">🚨 At-Fault Accident</button>
+          <button class="record-btn" data-record="ticket">⚠️ Ticket</button>
+          <button class="record-btn" data-record="accident">🚨 Accident</button>
           <button class="record-btn" data-record="dui">🔴 DUI</button>
         </div>
       </div>
-
       <div class="price-display">
-        <div class="price-label">Your estimated monthly premium</div>
+        <div class="price-label">Monthly Premium</div>
         <div class="price-value">$<span id="hud-price">127</span><span class="price-mo">/mo</span></div>
         <div class="risk-bar-wrap">
           <div class="risk-bar-track"><div class="risk-bar-fill" id="hud-risk-bar" style="width:55%"></div></div>
@@ -113,91 +94,56 @@
       </div>
     </div>
 
-    <!-- ── CROWD MATH ── -->
+    <!-- ── CROWD MATH (Scene 6) ── -->
     <div id="hud-crowd" data-hud="hud-crowd" class="hud-panel hud-side-left">
-      <div class="hud-chapter">Chapter 02</div>
+      <div class="hud-chapter">Chapter 02 · The Pool</div>
       <h2 class="hud-section-title">You're not paying alone.</h2>
-      <p class="hud-section-sub">Every golden orb is you. Every red one is a future claim.</p>
+      <p class="hud-section-sub">Every orb is a driver. Your gold orb is you.</p>
       <div id="crowd-math" class="crowd-math"></div>
     </div>
 
-    <!-- ── GUESS MECHANIC ── -->
+    <!-- ── GUESS MECHANIC (Scene 7) ── -->
     <div id="hud-guess" data-hud="hud-guess" class="hud-panel hud-center-wide">
-      <div class="hud-chapter">Chapter 04 · Quick Quiz</div>
+      <div class="hud-chapter">Chapter 03 · Myth Busters</div>
       <h2 class="hud-section-title">What do you think?</h2>
-      <p class="hud-section-sub">84% of people get at least one wrong.</p>
+      <p class="hud-section-sub">84% get at least one wrong.</p>
       <div id="guess-cards" class="guess-grid"></div>
     </div>
 
-    <!-- ── GAME ── -->
+    <!-- ── GAME (Scene 8) ── -->
     <div id="hud-game" data-hud="hud-game" class="hud-panel hud-side-right">
-      <div class="hud-chapter">Chapter 05 · Mission</div>
-      <h2 class="hud-section-title">Beat the system.</h2>
-      <p class="hud-section-sub">Get your premium below <strong>$80/mo</strong>.</p>
-
-      <div class="game-price-display">
-        $<span id="game-price">127</span><span class="price-mo">/mo</span>
-      </div>
-
+      <div class="hud-chapter">Chapter 04 · Beat the System</div>
+      <h2 class="hud-section-title">Get below $80/mo.</h2>
+      <div class="game-price-display">$<span id="game-price">127</span><span class="price-mo">/mo</span></div>
       <div class="moves-list">
-        <div class="move-row">
-          <div class="move-info"><div class="move-label">📱 Install telematics app</div><div class="move-save">-$18/mo</div></div>
-          <button class="move-btn" data-move="telematics">Apply</button>
-        </div>
-        <div class="move-row">
-          <div class="move-info"><div class="move-label">💸 Raise deductible to $2,000</div><div class="move-save">-$22/mo</div></div>
-          <button class="move-btn" data-move="deductible">Apply</button>
-        </div>
-        <div class="move-row">
-          <div class="move-info"><div class="move-label">📚 Defensive driving course</div><div class="move-save">-$9/mo</div></div>
-          <button class="move-btn" data-move="course">Apply</button>
-        </div>
-        <div class="move-row">
-          <div class="move-info"><div class="move-label">🏠 Bundle with renter's insurance</div><div class="move-save">-$14/mo</div></div>
-          <button class="move-btn" data-move="bundle">Apply</button>
-        </div>
-        <div class="move-row">
-          <div class="move-info"><div class="move-label">📈 Improve credit score 100 pts</div><div class="move-save">-$31/mo</div></div>
-          <button class="move-btn" data-move="credit">Apply</button>
-        </div>
+        <div class="move-row"><div class="move-info"><div class="move-label">📱 Install telematics app</div><div class="move-save">-$18/mo</div></div><button class="move-btn" data-move="telematics">Apply</button></div>
+        <div class="move-row"><div class="move-info"><div class="move-label">💸 Raise deductible $2,000</div><div class="move-save">-$22/mo</div></div><button class="move-btn" data-move="deductible">Apply</button></div>
+        <div class="move-row"><div class="move-info"><div class="move-label">📚 Defensive driving course</div><div class="move-save">-$9/mo</div></div><button class="move-btn" data-move="course">Apply</button></div>
+        <div class="move-row"><div class="move-info"><div class="move-label">🏠 Bundle with renter's</div><div class="move-save">-$14/mo</div></div><button class="move-btn" data-move="bundle">Apply</button></div>
+        <div class="move-row"><div class="move-info"><div class="move-label">📈 Improve credit 100 pts</div><div class="move-save">-$31/mo</div></div><button class="move-btn" data-move="credit">Apply</button></div>
       </div>
-
-      <div id="game-won" class="game-won hidden">
-        <div class="won-icon">🏆</div>
-        <div class="won-title">Mission Complete!</div>
-        <div class="won-text">You cracked the system.</div>
-      </div>
+      <div id="game-won" class="game-won hidden">🏆 <strong>System Beaten!</strong> Under $80/month.</div>
     </div>
 
-    <!-- ── CLIFFHANGER ── -->
+    <!-- ── CLIFFHANGER (Scene 9) ── -->
     <div id="hud-cliff" data-hud="hud-cliff" class="hud-panel hud-center">
-      <div class="cliff-badge">✓ Experience #01 Complete</div>
+      <div class="cliff-badge">✓ Experience Complete</div>
       <h2 class="cliff-title">Now you know how they<br/><span class="accent">set your price.</span></h2>
       <p class="cliff-sub">But here's what they don't tell you...</p>
-
-      <!-- Viral card -->
       <div class="viral-card">
         <div class="viral-label">🎯 Challenge a friend</div>
         <div class="viral-result">My insurance: <strong>$<span id="viral-price">127</span>/mo</strong></div>
         <div class="viral-q">Can you get below <strong>$80</strong>?</div>
         <div class="viral-btns">
-          <button class="viral-btn primary" onclick="viralShare('twitter')">𝕏 Challenge on X</button>
+          <button class="viral-btn primary" onclick="viralShare('twitter')">𝕏 Share on X</button>
           <button class="viral-btn secondary" onclick="viralShare('copy')">🔗 Copy Link</button>
         </div>
         <div id="viral-copied" class="viral-copied"></div>
       </div>
-
-      <div class="cliff-next">
-        <div class="cliff-next-label">Coming Next →</div>
-        <h3 class="cliff-next-title">How does InsurCorp actually <em>make money</em>?</h3>
-        <p class="cliff-next-sub">Hint: it's not from your premiums.</p>
-      </div>
-
-      <!-- Email -->
       <div class="email-widget">
-        <div class="email-label">Get notified when new experiences launch</div>
+        <div class="email-label">Get notified when next experience launches</div>
         <div class="email-row">
-          <input id="email-input" type="email" class="email-input" placeholder="your@email.com" />
+          <input id="email-input" type="email" class="email-input" placeholder="your@email.com"/>
           <button class="email-btn" onclick="subscribeEmail(document.getElementById('email-input').value)">Notify Me</button>
         </div>
       </div>
@@ -205,6 +151,36 @@
 
   </div><!-- /hud-layer -->
 
+  <!-- ── NAVIGATION CHROME ── -->
+  <div id="nav-chrome">
+    <!-- Scene label -->
+    <div id="scene-label" class="scene-label">1 / 10 — Arrival</div>
+
+    <!-- Dot indicators -->
+    <div id="nav-dots" class="nav-dots">
+      <div class="nav-dot active"  onclick="goToSceneBtn(0)" title="Arrival"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(1)" title="The City"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(2)" title="InsurCorp"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(3)" title="Enter"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(4)" title="Elevator"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(5)" title="Profile"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(6)" title="1000 Drivers"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(7)" title="Myths"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(8)" title="Game"></div>
+      <div class="nav-dot"         onclick="goToSceneBtn(9)" title="End"></div>
+    </div>
+
+    <!-- Prev / Next -->
+    <button id="btn-prev" class="nav-arrow left"  onclick="prevScene()" style="opacity:0">&#8592;</button>
+    <button id="btn-next" class="nav-arrow right" onclick="nextScene()">&#8594;</button>
+  </div>
+
   <script type="module" src="/src/main.js"></script>
+  <script>
+    // Bridge for HTML onclick (before module loads)
+    function goToSceneBtn(i) {
+      import('/src/scenes/director.js').then(m => m.goToScene(i));
+    }
+  </script>
 </body>
 </html>

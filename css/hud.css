@@ -39,15 +39,104 @@ body {
   z-index: 0;
 }
 
-/* ── Scroll container — tall div that creates scroll distance ── */
-#scroll-container {
-  position: relative;
-  width: 100%;
-  height: 700vh;
+/* ── Scene fade overlay ── */
+#scene-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
   pointer-events: none;
+  z-index: 50;
+  transition: none;
 }
 
-/* ── Cursor glow ── */
+/* ── Begin button ── */
+.begin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #00d4ff, #6366f1);
+  border: none;
+  border-radius: 100px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #020408;
+  cursor: pointer;
+  font-family: var(--font-display);
+  margin-top: 28px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 30px rgba(0,212,255,0.4);
+}
+.begin-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 50px rgba(0,212,255,0.6); }
+.begin-btn:active { transform: scale(0.97); }
+.hero-tag { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 20px; }
+.key-hint { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+/* ── Navigation Chrome ── */
+#nav-chrome {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 20;
+  background: linear-gradient(to top, rgba(2,4,8,0.8) 0%, transparent 100%);
+  pointer-events: none;
+}
+#nav-chrome > * { pointer-events: all; }
+
+.scene-label {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(240,244,255,0.35);
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 20;
+}
+
+.nav-dots { display: flex; gap: 8px; align-items: center; }
+.nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+.nav-dot:hover   { background: rgba(0,212,255,0.5); transform: scale(1.4); }
+.nav-dot.visited { background: rgba(0,212,255,0.3); }
+.nav-dot.active  { background: var(--accent); transform: scale(1.5); box-shadow: 0 0 8px rgba(0,212,255,0.8); border-color: rgba(0,212,255,0.3); }
+
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  width: 48px; height: 48px;
+  font-size: 18px;
+  color: rgba(240,244,255,0.6);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+.nav-arrow:hover { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.4); color: var(--accent); transform: translateY(-50%) scale(1.1); }
+.nav-arrow.left  { left: 20px; }
+.nav-arrow.right { right: 20px; }
+
+/* ── HUD panel (no scroll-container needed) ── */
+
 #cursor-glow {
   position: fixed;
   width: 300px; height: 300px;
