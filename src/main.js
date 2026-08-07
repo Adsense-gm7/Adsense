@@ -1,14 +1,14 @@
 /* ============================================================
    src/main.js — Entry point
-   Orchestrates: Three.js world + scroll + HUD + analytics
+   Single RAF loop: Lenis + Three.js composer
    ============================================================ */
 import { initScene, renderer, camera, scene, clock } from './world/scene.js';
 import { initPostProcessing, detectQuality, composer } from './world/postprocessing.js';
-import { buildCity }     from './world/city.js';
+import { buildCity }      from './world/city.js';
 import { buildInsurCorp } from './world/building.js';
 import { buildStars, buildDust, buildCrowdOrbs, animateParticles } from './world/particles.js';
-import { initLenis }     from './scroll/lenis.js';
-import { initScrollTimeline } from './scroll/timeline.js';
+import { initLenis, lenisRaf }  from './scroll/lenis.js';
+import { initScrollTimeline }   from './scroll/timeline.js';
 import { initHUD }       from './ui/hud.js';
 import { unlockAchievement } from './ui/achievements.js';
 import { trackEvent, trackSceneEnter, SESSION_ID } from './analytics/tracker.js';
@@ -20,47 +20,46 @@ async function boot() {
   // 1. Three.js scene
   initScene(canvas);
 
-  // 2. Post-processing
+  // 2. Post-processing (quality-adaptive)
   const quality = detectQuality();
   initPostProcessing(quality);
 
-  // 3. Build world
+  // 3. Build 3D world
   buildStars();
   buildDust();
   buildCity();
   buildInsurCorp();
   buildCrowdOrbs();
 
-  // 4. Smooth scroll
+  // 4. Smooth scroll (Lenis)
   const lenis = initLenis();
 
-  // 5. Scroll timeline (camera path)
+  // 5. Camera scroll timeline
   initScrollTimeline(lenis);
 
-  // 6. HUD overlays
+  // 6. HTML HUD overlays
   initHUD();
 
   // 7. Analytics
   trackEvent('page_view', 0, { session: SESSION_ID, quality });
   trackSceneEnter(0);
-  unlockAchievement('started');
+  setTimeout(() => unlockAchievement('started'), 1500);
 
   // 8. Cursor glow
   initCursorGlow();
 
-  // 9. Live counter animation
+  // 9. Live counter
   animateLiveCounter();
 
-  // 10. Render loop
-  render();
-}
-
-// ── Render loop ───────────────────────────────────────────
-function render() {
+  // 10. Single RAF render loop (Lenis + Three.js in sync)
+  function render(time) {
+    requestAnimationFrame(render);
+    lenisRaf(time);                   // advance Lenis smooth scroll
+    const delta = clock.getDelta();
+    animateParticles(delta);
+    composer.render();
+  }
   requestAnimationFrame(render);
-  const delta = clock.getDelta();
-  animateParticles(delta);
-  composer.render();
 }
 
 // ── Cursor glow ───────────────────────────────────────────

@@ -27,7 +27,7 @@ export function initScene(canvas) {
   // ── Scene ─────────────────────────────────────────────────
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x020408);
-  scene.fog = new THREE.FogExp2(0x0a1628, 0.018);
+  scene.fog = new THREE.FogExp2(0x0a1628, 0.008);
 
   // ── Camera ────────────────────────────────────────────────
   camera = new THREE.PerspectiveCamera(
@@ -36,8 +36,8 @@ export function initScene(canvas) {
     0.1,
     2000
   );
-  camera.position.set(0, 120, 200);
-  camera.lookAt(0, 0, 0);
+  camera.position.set(0, 220, 320);
+  camera.lookAt(0, 60, 0);
 
   // ── Lights ────────────────────────────────────────────────
   // Ambient
