@@ -108,6 +108,7 @@ function selectAge(btn) {
   updatePrice();
   updateScene2Data();
   updateScene3Data();
+  if (typeof unlockAchievement === 'function') unlockAchievement('profiled');
 }
 
 function selectCar(btn) {
@@ -213,17 +214,18 @@ function goToScene(num) {
   const next = document.getElementById(`scene-${num}`);
   if (!next) return;
 
+  const fromScene = state.currentScene;
   if (prev) { prev.classList.remove('active', 'visible'); }
 
   state.currentScene = num;
   next.classList.add('visible', 'active');
   next.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Update progress bar
+  // Progress bar
   const pct = ((num) / totalScenes) * 100;
   progressFill.style.width = pct + '%';
 
-  // Show/hide chapter nav
+  // Chapter nav
   const chapNav = document.getElementById('chapter-nav');
   if (num >= 1) {
     chapNav.classList.remove('hidden');
@@ -233,6 +235,11 @@ function goToScene(num) {
   } else {
     chapNav.classList.add('hidden');
   }
+
+  // Fire scene-change event for analytics.js
+  window.dispatchEvent(new CustomEvent('scene-change', {
+    detail: { from: fromScene, to: num }
+  }));
 
   // Scene-specific init
   if (num === 2) initScene2();

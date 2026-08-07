@@ -132,6 +132,9 @@ function initScene2() {
   // Reset math steps
   document.querySelectorAll('.math-step').forEach(s => s.classList.remove('visible'));
 
+  // WOW: mark crowd animation start
+  if (typeof trackWowStart === 'function') trackWowStart('crowd_animation', 2);
+
   const startTime = performance.now();
   crowdAnimFrame = requestAnimationFrame(() => drawCrowd(canvas, ctx, startTime));
 }
@@ -293,6 +296,11 @@ function showGameWon() {
   animateNum(wonFinal, state.gamePrice);
   animateNum(wonSaved, (state.startPrice - state.gamePrice) * 12);
   wonEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Achievements & WOW tracking
+  if (typeof unlockAchievement === 'function') unlockAchievement('game_winner');
+  if (typeof trackWowContinue  === 'function') trackWowContinue('game_win');
+  if (typeof trackGameWon      === 'function') trackGameWon(state.startPrice, state.gamePrice);
 }
 
 /* ══════════════════════════════════════════
